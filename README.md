@@ -1,3 +1,3 @@
 # Verilog
 
-**Verilog 笔记 问题**
+**Verilog 笔记、问题**
