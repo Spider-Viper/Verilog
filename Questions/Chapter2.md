@@ -24,5 +24,6 @@
     - 时序仿真 布局布线之后可以提供一个时序仿真模型，模型中包含了器件的信息，同时提供一个SDF时序标注文件（Standard Delay Format Timing Anotation）。
 4. 如果不使用initial块，能否产生测试时钟？
     不能产生测试时钟。未初始化，时钟信号始终为x
-    ![仿真图片](C:\Users\viper\Desktop\clock_tb_wave.PNG "仿真波形图")
+
+    ![仿真图片](https://github.com/Spider-Viper/Picture/blob/main/clock_tb_wave.PNG "仿真波形图")
 5. initial块和always块的不同
