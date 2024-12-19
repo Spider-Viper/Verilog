@@ -27,3 +27,78 @@
 
     ![仿真图片](https://github.com/Spider-Viper/Picture/blob/main/clock_tb_wave.PNG "仿真波形图")
 5. initial块和always块的不同
+
+    There are mainly two types of procedual blocks in Verilog - initial and always.
+    - initial块
+        * 不可被综合
+        * 主要用于仿真过程中的变量初始化
+        * 多个initial块并行执行
+        * initial块在仿真过程中仅执行一次
+
+        ***notes:***
+        ```
+            module sim();
+
+                reg a, b;
+
+                initial begin
+                    a = 1'b0;
+                    #20 b = 1'b0;
+                end
+
+                initial begin
+                    #10 a = 1'b1;
+                    #40 b = 1'b1;
+                end
+                
+                initial begin
+                    #30 $finish;    // $finish system task
+                                    // terminate the current simulation
+                end
+            endmodule
+
+            // 以上模块中，经过30个单位时间之后，执行system task $finish,此时，会结束其他尚未执行完毕的initial块。
+        ```
+    - always块
+        * sensitivity list
+            - no sensitivity list
+                
+                ```
+                // 用于仿真，产生时钟信号：
+                always #10 clk = ~clk;
+                // If there is no timing control statements within an always block ,the simulation will hang because of a zero-delay infinite loop.
+                // Explicit delays are not synthesizable into logic gates.
+                ```                  
+        * 用于组合逻辑电路和时序逻辑电路，可被综合
+        * To be synthesis, fllow one of the fllowing templates:
+            ```
+            // Template #1: Use for combinational logic,all inputs mentioned in sensitivity list.
+            always @(all_inputs) begin
+                // combinational logic
+            end
+
+            // Template #2: Use of a if condition without else.
+            // Cause a latch
+            always @(all_inputs) begin
+                if(enable) begin
+
+                end
+            end
+
+            // Template #3: Use clock in sensitivity list for sequential elements.
+            always @(posedge clk) begin
+                // behavior to do at posedge clock
+            end
+
+            // Template #4: Use clock and async reset in sensitivity list.
+            always @(posedge clk or negedge rstn) begin
+                if(!rstn) begin
+                    // behavior to do during reset
+                end else begin
+                    // behavior when not in reset
+                end
+            end
+
+
+        
+
