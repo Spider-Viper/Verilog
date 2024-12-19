@@ -36,7 +36,7 @@
         * initial块在仿真过程中仅执行一次
 
         ***notes:***
-        ```
+        ```verilog
             module sim();
 
                 reg a, b;
@@ -63,15 +63,15 @@
         * sensitivity list
             - no sensitivity list
                 
-                ```
+                ```verilog
                 // 用于仿真，产生时钟信号：
-                always #10 clk = ~clk;
+                    always #10 clk = ~clk;
                 // If there is no timing control statements within an always block ,the simulation will hang because of a zero-delay infinite loop.
                 // Explicit delays are not synthesizable into logic gates.
                 ```                  
         * 用于组合逻辑电路和时序逻辑电路，可被综合
         * To be synthesis, fllow one of the fllowing templates:
-            ```
+            ```verilog
             // Template #1: Use for combinational logic,all inputs mentioned in sensitivity list.
             always @(all_inputs) begin
                 // combinational logic
@@ -99,6 +99,3 @@
                 end
             end
             ```
-
-        
-
