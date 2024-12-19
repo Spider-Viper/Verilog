@@ -1,1 +1,3 @@
-# 夏宇闻Verilog笔记
+# Verilog笔记
+
+[Verilog Tutorial]<https://www.chipverify.com/tutorials/verilog>
