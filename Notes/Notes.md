@@ -103,10 +103,9 @@
              $display("data[0:9] = 0x%0h", data[0:9]);    // Error: Reversed part-select index expression ordering
          end
      endmodule
-     
      ```
 
-Array and Memories
+### Array and Memories
 
 1. Arrays are allowed in Verilog for reg, wire, integer, and real data types.
    
@@ -144,7 +143,3 @@ Array and Memories
      ![](https://github.com/Spider-Viper/Picture/blob/main/Memory.PNG)
 
 ### Strength
-
-
-
-
