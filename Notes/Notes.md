@@ -221,31 +221,30 @@
        reg [7:0] c;
    
    endmodule
-```
+   ```
    ```verilog
-// Verilog 2001
-/***********************************************************************/
-// If a port declaration includes a net or variable type, then that port
-// is considered to be completely declared. It is illegal to redeclare the same
-// port in a net or variable type declaration.
-module test(
-    output reg [7:0] e,
-    input      [7:0] a
-);
-    wire signed [7:0] a;     // illegal - declaration of a is already complete -> simulator dependent
-    wire        [7:0] e;     // illegal - declaration of e is already complete
-endmodule
-/***********************************************************************/
-// If the port declaration does not include a net or variable type, then the port
-// can be declared in a net or variable type declaration again.
-module test(
-    output [7:0] e,
-    input  [7:0] a
-);
-    reg [7:)] e;     // Okay
-endmodule
-```
-
+   // Verilog 2001
+   /***********************************************************************/
+   // If a port declaration includes a net or variable type, then that port
+   // is considered to be completely declared. It is illegal to redeclare the same
+   // port in a net or variable type declaration.
+   module test(
+       output reg [7:0] e,
+       input      [7:0] a
+   );
+       wire signed [7:0] a;     // illegal - declaration of a is already complete -> simulator dependent
+       wire        [7:0] e;     // illegal - declaration of e is already complete
+   endmodule
+   /***********************************************************************/
+   // If the port declaration does not include a net or variable type, then the port
+   // can be declared in a net or variable type declaration again.
+   module test(
+       output [7:0] e,
+       input  [7:0] a
+   );
+       reg [7:)] e;     // Okay
+   endmodule
+   ```
 ### Module Instantiations
 
 1. **Unconnected/Floating Ports**
