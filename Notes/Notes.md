@@ -402,7 +402,7 @@ endmodule
 
 ### Combinational Logic with Assign
 
-1. Example #1: Simple combinational logic
+   1. Example #1: Simple combinational logic
    
    ```verilog
    // code
