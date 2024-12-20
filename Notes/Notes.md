@@ -222,7 +222,7 @@
    
    endmodule
 ```
-```verilog
+   ```verilog
 // Verilog 2001
 /***********************************************************************/
 // If a port declaration includes a net or variable type, then that port
