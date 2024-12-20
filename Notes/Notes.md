@@ -211,7 +211,7 @@
        wire [7:0] c;
    endmodule
    ```
-   
+   ```verilog
    module test(a, b, c);
    
        output [7:0] c;    // By default c is of type wire
@@ -221,7 +221,6 @@
        reg [7:0] c;
    
    endmodule
-
 ```
 ```verilog
 // Verilog 2001
