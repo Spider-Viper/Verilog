@@ -242,7 +242,7 @@
        output [7:0] e,
        input  [7:0] a
    );
-       reg [7:)] e;     // Okay
+       reg [7:0] e;     // Okay
    endmodule
    ```
 ### Module Instantiations
@@ -396,7 +396,9 @@ endmodule
 
 4. assign reg variables
    
-   It is illegal to drive or assign **reg** type variable with an _assign statement_. This is because a **reg** variable is capable of storing data and does not require to be driven continuously. **reg** signals can only be driven in procedual blocks like **initial** and **always**.
+   It is illegal to drive or assign **reg** type variable with an _assign statement_. 
+   This is because a **reg** variable is capable of storing data and does not require to be driven continuously. 
+   **reg** signals can only be driven in procedual blocks like **initial** and **always**.
 
 ### Combinational Logic with Assign
 
@@ -427,9 +429,217 @@ endmodule
        );
    
        initial begin
-           // At the beginning of time, initialize all inputs of the design to a
-           // known value.
-           a
+            // At the beginning of time, initialize all inputs of the design to a
+            // known value.
+            a <= 0;
+            b <= 0;
+            c <= 0;
+            d <= 0;
+            e <= 0;
+
+            // Use a $monitor task to print any change in the signal to simulation console
+            $monitor("a=%0b b=%0b c=%0b d=%0b e=%0b z=%0b", a,b,c,d,e,z);
+
+            // Because there are 5 inputs, there can be 32 different input combinations
+            // So use an iterator "i" to increment from 0 to 32 and assign the value
+            // to tesebench variables so that it drives the design inputs
+            for(i = 0; i < 32; i = i + 1) begin
+                {a,b,c,d,e} = i;
+                #10;
+            end
        end
    endmodule
    ```
+   2. Example #2 : Half Adder
+   ```verilog
+   // code
+   module ha(
+        output sum, cout,
+        input a, b
+   );
+        assign sum = a ^ b;
+        assign cout = a & b;
+   endmodule
+
+   // testbench
+   module tb;
+        // declare testbench variables
+        reg a, b;
+        wire sum, cout;
+        integer i;
+
+        ha UUT_0(
+            .a(a),
+            .b(b),
+            .sum(sum),
+            .cout(cout)
+        );
+
+        initial begin
+            a <= 0;
+            b <= 0;
+
+            $monitor("a=%0b b=%0b sum=%0b cout=%0b", a,b,sum,cout);
+
+            for(i = 0; i < 4; i = i + 1) begin
+                {a,b} = i;
+                #10;
+            end
+        end
+   endmodule
+   ```
+   3. Example #3 : Full Adder
+   ```verilog
+   // code
+   module fa(
+        output sum, cout,
+        input  a, b, cin
+   );
+        assign sum = (a ^ b) ^ cin;
+        assign cout = (a & b) | ((a ^ b) & cin);
+   endmodule
+
+   // testbench
+   module tb;
+        reg a, b, cin;
+        wire sum, cout;
+        integer i;
+
+        fa UUT_0(
+            .a(a),
+            .b(b),
+            .cin(cin),
+            .sum(sum),
+            .cout(cout)
+        );
+
+        initial begin
+            a <= 0;
+            b <= 0;
+
+            $monitor("a=%0b b=%0b cin=%0b sum=%0b cout=%0b", a, b, cin, sum, cout);
+
+            for(i = 0; i < 7; i = i + 1) begin
+                {a,b,cin} = i;
+                #10;
+            end
+        end
+   endmodule
+   ```
+   4. Example #4 : 2-to-1 MUX
+   ```verilog
+   // code
+   module mux_2to1(
+        output out,
+        input  a, b, sel
+   );
+
+        assign out = sel ? b : a;
+        
+   endmodule
+
+   // testbench
+   module tb;
+        reg a, b, sel
+        wire out;
+        integer i;
+
+        mux_2to1 UUT_0(
+            .out(out),
+            .a(a),
+            .b(b),
+            .sel(sel)
+        );
+
+        initial begin
+            a <= 0;
+            b <= 0;
+            sel <= 0;
+
+            $monitor("a=%0b b=%0b sel=%0b out=%0b", a, b, sel, out);
+
+            for(i = 0; i <= 3; i = i + 1) begin
+				{a, b, sel} = i;
+				#10;
+			end
+        end
+   endmodule
+   ```
+   5. Example #5 : 1to4 Demultiplexer
+   ```verilog
+   // code
+   module demux_1to4(
+		output a, b, c, d,
+		input  in,
+		input [1:0] sle
+   );
+		assign a = in & ~sel[1] & ~sel[0];
+		assign b = in & sel[1] & ~sel[0];
+		assign c = in & ~sel[1] & sel[0];
+		assign d = in & sel[1] & sel[0];
+   endmodule
+   
+   // testbench
+   module tb;
+		reg in;
+		reg [1:0] sel;
+		wire a, b, c, d;
+		integer i;
+		
+		demux_1to4 UUT_0(
+			.a(a),
+			.b(b),
+			.c(c),
+			.d(d),
+			.sel(sel),
+			.in(in)
+		);
+		
+		initial begin
+			f <= 0;
+			sel <= 0;
+			
+			$monitor("in=%0b sel=%0b a=%0b b=%0b c=%0b d=%0b", in, sel, a, b, c, d);
+			
+			for(i = 0; i < 8; i = i + 1) begin
+				{in,sel} = i;
+				#10;
+			end
+		end
+   endmodule
+   ```
+   6. Example #6 : 4to16 Decoder
+   ```verilog
+   // code
+   module dec_4to16(
+		output [15:0] out,
+		input  [3:0]  in
+   );
+		assign out = 1 << in;
+   endmodule
+   
+   //testbench
+   module tb;
+		reg 	[3:0] 	in;
+		wire 	[15:0] 	out;
+		integer 		i;
+		
+		dec_4to16 UUT_0(
+			.out(out),
+			.in(in)
+		);
+		
+		initial begin
+			in <= 0;
+			
+			$monitor("in=0x%0h out=0x%0h", in, out);
+			
+			for(i = 0; i <= 15; i = i + 1) begin
+				in = i;
+				#10;
+			end
+		end
+   endmodule
+   ```
+   
+   
