@@ -523,10 +523,11 @@ endmodule
                 {a,b,cin} = i;
                 #10;
             end
+			
         end
    endmodule
    ```
-   4. Example #4 : 2-to-1 MUX
+   4. Example #4 : 2to1 MUX
    ```verilog
    // code
    module mux_2to1(
@@ -540,7 +541,7 @@ endmodule
 
    // testbench
    module tb;
-        reg a, b, sel
+        reg a, b, sel;
         wire out;
         integer i;
 
@@ -562,6 +563,7 @@ endmodule
 				{a, b, sel} = i;
 				#10;
 			end
+			
         end
    endmodule
    ```
@@ -605,6 +607,7 @@ endmodule
 				{in,sel} = i;
 				#10;
 			end
+			
 		end
    endmodule
    ```
@@ -622,7 +625,7 @@ endmodule
    module tb;
 		reg 	[3:0] 	in;
 		wire 	[15:0] 	out;
-		integer 		i;
+		integer 	i;
 		
 		dec_4to16 UUT_0(
 			.out(out),
@@ -638,6 +641,7 @@ endmodule
 				in = i;
 				#10;
 			end
+			
 		end
    endmodule
    ```
