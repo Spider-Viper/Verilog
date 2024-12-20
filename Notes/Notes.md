@@ -143,3 +143,296 @@
      ![](https://github.com/Spider-Viper/Picture/blob/main/Memory.PNG)
 
 ### Strength
+
+    略
+
+### Module
+
+1. list of ports is optional
+   
+   ```verilog
+   // A module can have an empyt portlist
+   module name;
+       // Contents of the module
+   endmodule
+   ```
+
+2. Hierarchical Names
+   
+   A hierarchical structure is formed when module can be instantiated inside one another, and hence the top level module is called the root. Since each lower module instantiations within a given module is required to have different identifier names, there will not be any ambiguity in accessing signals. A hierarchical name is constructed by a list of these identifiers separated by dots for each level of the hierarchy. Any signal can be accessed within any module using the hierarchical path to that paricular signal.
+   
+   ```verilog
+   design.mod_inst1
+   design.mod_inst1.y
+   testbench.d0._net;
+   ```
+
+### Ports
+
+1. Ports are by default considered as nets of type wire.
+
+2. **Signed ports**
+   
+   The *signed* attribute can be attached to a port declaration or a net/reg declaration or both. Implicit nets are by default **unsigned**.
+   
+   ```verilog
+   module mod_name (
+       output c,
+       input a, b
+   );
+       // prots a, b, and c are by default unsigned
+   endmodule
+   ```
+   
+   If either the net/reg declaration has a *signed* attribute, then the other shall also be considered signed.
+   
+   ```verilog
+   module mod_name(
+       output c,
+       input signed a, b
+   );
+       wire a, b;    // a, b are signed from port declaration
+       reg signed c;    // c is signed from reg declaration
+   endmodule
+   ```
+
+3. **Port Variations**
+   
+   ```verilog
+   // Verilog 1995
+   module test(a, b, c);
+       output [7:0] c,    // output "c" by default is a wire
+       input  [7:0] a,    // input "a" and "b" are wires
+       input  [7:0] b
+   
+       // Still, you can declare them again as wires to avoid confusion
+       wire [7:0] a;
+       wire [7:0] b;
+       wire [7:0] c;
+   endmodule
+   ```
+   
+   module test(a, b, c);
+   
+       output [7:0] c;    // By default c is of type wire
+       input [7:0] a, b;
+       
+       // port "c" is changed to a reg type
+       reg [7:0] c;
+   
+   endmodule
+
+```
+```verilog
+// Verilog 2001
+/***********************************************************************/
+// If a port declaration includes a net or variable type, then that port
+// is considered to be completely declared. It is illegal to redeclare the same
+// port in a net or variable type declaration.
+module test(
+    output reg [7:0] e,
+    input      [7:0] a
+);
+    wire signed [7:0] a;     // illegal - declaration of a is already complete -> simulator dependent
+    wire        [7:0] e;     // illegal - declaration of e is already complete
+endmodule
+/***********************************************************************/
+// If the port declaration does not include a net or variable type, then the port
+// can be declared in a net or variable type declaration again.
+module test(
+    output [7:0] e,
+    input  [7:0] a
+);
+    reg [7:)] e;     // Okay
+endmodule
+```
+
+### Module Instantiations
+
+1. **Unconnected/Floating Ports**
+   
+   Ports that are not connected to any wire in the instantiating module will have a value of high-impendance - z.
+   
+   ```verilog
+   module mydesign (
+       output o,
+       input x, y, z
+   );
+   endmodule
+   ```
+   
+   module tb_top;
+   
+       wire [1:0] a;
+       wire       c;    // output
+       
+       mydesign d0 (
+           .x(),    // x is an input and not connected, hence a[0] will be z
+           .y(a[1]),
+           .z(a[1]),
+           .o()    // o has valid value in mydesign but since it is not connected to "c" in tb_top, c will be z
+       );
+   
+   endmodule
+
+```
+![](https://github.com/Spider-Viper/Picture/blob/main/Unconnected-Floating%20Ports.PNG)
+
+Note that output from instances u1 and u2 are left unconnected in the RTL schematic obtained after synthesis. Since the input d to instances u2 and u3 are now connected to nets that are not being driven by anything it is grounded.
+
+In simulations, such unconnected ports will be denoted as high impedance.
+
+All port declarations are implicity declared as wire and hence the port direction is sufficient in that case. However output ports that need to store values should be declared as reg data type and _can be used in a procedural block like always and initial only._
+
+Ports of type input or inout cannot be declared as reg because they are being driven from outside continuously and should not store values, rather reflect the changes in the external signals as soon as possible.
+
+*It is perfectly legal to connect two ports with varying vector sizes, but the one with lower vector size will prevail and the remaining bits of the other port with a higher width will be ignored.*
+
+```verilog
+// Case #1 : Inputs are by default implicitly declared as type "wire"
+module des0_1(input wire clk);    // wire neet not be specified here
+module des0_2(input clk);        // By default clk is of type wire
+
+
+// Case #2 : Inputs connot be of type reg
+module des1(input reg clk);    // Illegal : inputs cannot be of type reg
+
+
+// Case #3 : Take two module here with varying port widths
+module des2(output [3:0] data);
+module des3(input [7:0] data);
+
+
+module top();
+    wire [7:0] net;
+    des2 u0(.data(net));    // Upper 4-bits of net are undriven
+    des3 u1(.data(net));     
+endmodule
+
+
+// Case #4 : Outputs cannot be connected to reg in parent module
+module top();
+    reg [3:0] data_reg;
+    des2 u0(.data(data_reg));    // Illegal: data output port is connected to a reg type signal "data_reg"
+                                 // 顶层模块进行各子模块的连接，当然需要用导线连接！
+endmodule
+```
+
+### Assign Statement
+
+1. syntax
+   
+   The drive strenth and delay are optional and are mostly used for dataflow modeling than synthesizing into real harware.
+   
+   > assign <net_expression> = [drive_strenth][delay]<expression of different signals or constant value>
+   
+   Delay values are useful for specifying delays for gates and are used to module timing behavior in real hardware because the value dictates when the net should be assigned with the evaluated value.
+
+2. rules:
+   
+   - LHS should always be a scalar or vector net or a concatenation of scalar or vector nets and *never a scalar or vector register*.
+   
+   - RHS can contain scalar or vector registers and function calls.
+   
+   - Whenever any operand on the RHS changes in value, LHS will be updated with the new value.
+   
+   - **assign** statements are also called continuous assignments and are always active.
+
+3. ```verilog
+   module xyz(
+       output [4:0] z,
+       input  [3:0] x,    // x = 'b1100
+       input        y     // y = 'b1
+   );
+       wire [1:0] a;
+       wire       b;
+   
+       // Case #1 : 4-bits of x and 1 bit of y is concatenated to get a 5-bit net
+       // and is assigned to the 5-bit nets of z. So value of z='b11001 or z='h19
+       assign z = {x,y};
+   
+       // Case #2 : 4-bits of x and 1 bit of y is concatenated to get a 5-bit net
+       // and is assigned to selected 3-bits of net z. Remaining 2 bits of z remains
+       // undriven and will be high-imp. So value of z='bZ001Z
+       assign z[3:1] = {x,y};    // {x,y} = 5'b11001
+   
+       // Case #3 : The same statement is used but now bit4 of z is driven with a 
+       // constant value of 1. Now z='b1001Z because only bit0 remains undriven
+       assign z[3:1] = {x,y};
+       assign z[4] = 1;
+   
+       // Case #4 : Assume bit3 is driven instead, but now there are two drivers for bit3, 
+       // and both are dirving the same value of 0. So there should be no contention
+       // and value of z='bZ001Z
+       assign z[3:1] = {x,y};
+       assign z[3] = 0;
+   
+       // Case #5 : Assume bit3 is instead driven with value 1, so now there are two
+       // drivers with different values, where the first line is driven with the value
+       // of X which at the time is 0 and the second assignment where it is driven
+       // with value 1, so now it becomes unknown which will win. So, z='bZX01Z
+       assign z[3:1] = {x,y};
+       assign z[3] = 1;
+   
+       // Case #6 : Partial selection fo operands on RHS is also possible and say only
+       // 2-bits are chosen from x, then z='b00001 because z[4:3] will be driven with 0
+       assign z = {x[1:0],y}
+   
+       // Case #7 : Say we explicitly assign only 3-bits of z and leave remaining
+       // unconnected the z='bZZ001
+       assign z[2:0] = {x[1:0],y};
+   
+       // Case #8 : Same variable can be used multiple times as well and z='b00111
+       // 3{y} is the same as {y,y,y}
+       assign z = {3{y}};
+   
+       // Case #9 : LHS can also be concatenated: a is 2-bit vector and b is scala
+       // RHS is evaluated to 11001 and LHS is 3-bit wide so first 3 bits from LSB
+       // of RHS will be assigned to LHS. So a='b00 and b='b1
+       assign {a,b} = {x,y};
+   
+       // Case #10 : If we reverse order on LHS keeping RHS same, we get a='b01 and
+       // b='b0
+       assign {b,a} = {x,y};
+   endmodule
+   ```
+
+4. assign reg variables
+   
+   It is illegal to drive or assign **reg** type variable with an _assign statement_. This is because a **reg** variable is capable of storing data and does not require to be driven continuously. **reg** signals can only be driven in procedual blocks like **initial** and **always**.
+
+### Combinational Logic with Assign
+
+1. Example #1: Simple combinational logic
+   
+   ```verilog
+   // code
+   module combo(
+       output z,
+       input  a, b, c, d, e
+   );
+       assign z = ((a & b) | (c ^ d) & ~e);
+   endmodule
+   
+   //Testbench
+   module tb;
+       reg a, b, c, d, e;
+       wire z;
+       integer i;
+       // Instantiate the design
+       combo UUT_0(
+           .a(a),
+           .b(b),
+           .c(c),
+           .d(d),
+           .e(e),
+           .z(z)
+       );
+   
+       initial begin
+           // At the beginning of time, initialize all inputs of the design to a
+           // known value.
+           a
+       end
+   endmodule
+   ```
