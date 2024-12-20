@@ -562,7 +562,7 @@ endmodule
             for(i = 0; i <= 3; i = i + 1) begin
 				{a, b, sel} = i;
 				#10;
-			end
+            end
 			
         end
    endmodule
