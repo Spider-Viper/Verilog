@@ -321,7 +321,7 @@ endmodule
    
    The drive strenth and delay are optional and are mostly used for dataflow modeling than synthesizing into real harware.
    
-   > assign <net_expression> = [drive_strenth][delay]<expression of different signals or constant value>
+   > assign <net_expression> = \[drive_strenth\]\[delay\]\<expression of different signals or constant value\>
    
    Delay values are useful for specifying delays for gates and are used to module timing behavior in real hardware because the value dictates when the net should be assigned with the evaluated value.
 
