@@ -259,7 +259,7 @@ endmodule
    );
    endmodule
    ```
-   
+   ```verilog
    module tb_top;
    
        wire [1:0] a;
@@ -273,8 +273,7 @@ endmodule
        );
    
    endmodule
-
-```
+   ```
 ![](https://github.com/Spider-Viper/Picture/blob/main/Unconnected-Floating%20Ports.PNG)
 
 Note that output from instances u1 and u2 are left unconnected in the RTL schematic obtained after synthesis. Since the input d to instances u2 and u3 are now connected to nets that are not being driven by anything it is grounded.
