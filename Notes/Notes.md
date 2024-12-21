@@ -651,6 +651,11 @@ endmodule
    | Operator | Description     |
    |----------|-----------------|
    | a ** b   | 3**2 = 3^2 = 9  |
+2. Relation Operators:
+   
+   If either of the operands is X or Z, then the result will be X.
+4. Equality Operators:
+
    
    
    
