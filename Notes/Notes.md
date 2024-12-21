@@ -646,6 +646,11 @@ endmodule
    endmodule
    ```
 ### Operator
-1. 
+1. If the second operand of a division or modulus operator is zero, then the result will be X.
+   
+   | Operator | Description     |
+   |----------|-----------------|
+   | a ** b   | 3**2 = 3^2 = 9  |
+   
    
    
