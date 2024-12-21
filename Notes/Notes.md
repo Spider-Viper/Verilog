@@ -648,13 +648,35 @@ endmodule
 ### Operator
 1. If the second operand of a division or modulus operator is zero, then the result will be X.
    
-   | Operator | Description     |
-   |----------|-----------------|
-   | a ** b   | 3**2 = 3^2 = 9  |
+	| Operator | Description     |
+	|----------|-----------------|
+	| a ** b   | 3**2 = 3^2 = 9  |
 2. Relation Operators:
    
-   If either of the operands is X or Z, then the result will be X.
-4. Equality Operators:
+	If either of the operands is X or Z, then the result will be X.
+4. Equality Operators(==;!=;===;!==):
+
+	If either of the operands of logical-equality(==) or logical-inequality(!=) is X or Z, then the result will be X.
+	
+	| Operator | Description |
+	| -------- | ----------- |
+	| a === b  | a equal to b, including x and z |
+	| a !== b  | a not equal to b, including x and z |
+5. Logical Operators(&&,||,!):
+	
+	If either of the operands is X, then the result will be X as well. 
+	
+	The logical negation (!) operator will convert a non-zero or true operand into 0 and a zero or false operand into 1, while an X will remain as an X.
+6. Bitwise Operators:
+
+	| & | 0 | 1 | x | z |
+	| ----------------- |
+	| 0 | 0 | 0 | 0 | 0 |
+	| 1 | 0 | 1 | x | x |
+	| x | 0 | x | x | x |
+	| z	| 0 | x | x | x |
+	
+
 
    
    
