@@ -682,7 +682,12 @@ endmodule
 	| 1    | 1    | 1    | 1    | 1    |
 	| x    | x    | 1    | x    | x    |
 	| z    | x    | 1    | x    | x    |
+7. Shift Operators:
+	- logical shift operator << and >>
+	- arithmetic shift operator <<< and >>>
 	
+		算术移位需要考虑符号位，而逻辑移位则无需考虑符号位。
+		
 
 
    
