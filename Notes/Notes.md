@@ -688,6 +688,97 @@ endmodule
 	
 		算术移位需要考虑符号位，而逻辑移位则无需考虑符号位。
 		
+		```verilog
+		// 循环左移
+		module shift_left(
+			output 	[7:0] 	out,
+			input			clk,
+			input			rstn
+		);
+			reg [7:0] shifter;
+			always @(posedge clk) begin
+				if(!rstn)
+					shifter <= 8'b1000_0000;
+				else
+					shifter <= {shifter[6:0],shifter[7]};
+			end
+			assign out = shifter;
+		endmodule
+		```
+		```verilog
+		// testbench
+		`timescale 1ns / 1ns
+		module tb;
+			reg 		clk, rstn;
+			wire [7:0]	out;
+			
+			shift_left UUT_0(
+				.out(out),
+				.clk(clk),
+				.rstn(rstn)
+			);
+			
+			initial begin
+				clk <= 1'b0;
+				rstn <= 1'b0;
+				#300
+				rstn = 1'b1;
+			end
+			always #10 clk = ~clk;
+			
+		endmodule
+		```
+		```verilog
+		// 循环右移
+		module shift_right(
+			output 	[7:0]	out,
+			input			clk,
+			input			rstn
+		);
+			reg [7:0] shifter;
+			always @(posedge clk) begin
+				if(!rstn)
+					shifter <= 8'b0000_0001;
+				else
+					shifter <= {shifter[0],shifter[7:1]};
+			end
+			assign out = shifter;
+		endmodule
+		```
+##### Operator:"{}"
+8. Concatenation Operator:
+9. Replication Operator:
+- When the same expression has to be repeated for a number of times, a *replication constant* is used which needs to be non-negative number and cannot be X, Z or any variable.
+- Replication expressions cannot appear on the left hand side of any assignment and *cannot be connected to output or inout ports*.
+- Operands will be evaluated only once when the replication expression is executed even if the constant is zero.
+- The Verilog replication operator **{}** is commonly used in digital design to create bit patterns for initializing registers, memory arrays, or looup tables.
+10. Sign Extension
+
+	In Verilog, sign extension is a way of extending a signed number with fewer bits to a wider signed number by replicating the sign bit. Basically, it is used when performing arithmetic or
+	logical operations on numbers with different bit widths.
+	
+	For example, let's say we have a 4-bit two's complement number, -3, represented as 1101. 
+	If we want to add this number to another 8-bit two's complement number, say -10, represented as 11110110, 
+	we first need to sign extend the 4-bit number to 8 bits to make it compatible with the 8-bit number. 
+	To sign extend the 4-bit number, we replicate its most significant bit (the sign bit) to fill the additional bits, resulting in 11111101. 
+	We can then add this sign-extended 4-bit number to the 8-bit number using normal Verilog arithmetic operations. 
+	
+	Example: (sign extend a 4-bit signed number to an 8-bit signed number)
+	```verilog
+	module sign_extension(
+		output reg 	signed [7:0] output_num,
+		input		signed [3:0] input_num
+	);
+		always @(*) begin
+			if(input_num[3] == 1'b1) begin	// if the sign bit is 1
+				output_num = {{8{1'b1}},input_num}; 	// Error: {8{1'b1},input_num}
+			end else begin	// if the sign bit is 0
+				output_num = {{8{1'b0}},input_num};
+			end
+		end
+	endmodule
+	```
+### Always Block
 
 
    
