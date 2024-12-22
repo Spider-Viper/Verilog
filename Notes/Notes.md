@@ -747,11 +747,15 @@ endmodule
 		```
 ##### Operator:"{}"
 8. Concatenation Operator:
+
+
 9. Replication Operator:
-- When the same expression has to be repeated for a number of times, a *replication constant* is used which needs to be non-negative number and cannot be X, Z or any variable.
-- Replication expressions cannot appear on the left hand side of any assignment and *cannot be connected to output or inout ports*.
-- Operands will be evaluated only once when the replication expression is executed even if the constant is zero.
-- The Verilog replication operator **{}** is commonly used in digital design to create bit patterns for initializing registers, memory arrays, or looup tables.
+	- When the same expression has to be repeated for a number of times, a *replication constant* is used which needs to be non-negative number and cannot be X, Z or any variable.
+	- Replication expressions cannot appear on the left hand side of any assignment and *cannot be connected to output or inout ports*.
+	- Operands will be evaluated only once when the replication expression is executed even if the constant is zero.
+	- The Verilog replication operator **{}** is commonly used in digital design to create bit patterns for initializing registers, memory arrays, or looup tables.
+	
+	
 10. Sign Extension
 
 	In Verilog, sign extension is a way of extending a signed number with fewer bits to a wider signed number by replicating the sign bit. Basically, it is used when performing arithmetic or
