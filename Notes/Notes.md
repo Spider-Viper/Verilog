@@ -804,14 +804,14 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 	- An "always block" can be used to realize combinational or sequantial elements. 
 	- always块内被赋值的变量必须为reg类型
 	- What happens if there is no sensitivity list?
-		If there are no timing control statments within an always block, the simulation will hang because of a zero-delay infinite loop.	
+		If there are no timing control statments within an always block, 
+		the simulation will hang because of a zero-delay infinite loop.	
 ```verilog
 		// There is no time control, and hence it will stay and
 		// be repeated at 0 time units only. This continues
 		// in a loop and simulation will hang
 		always clk = ~clk;
-```		
-```verilog
+
 		always #10 clk = ~clk;
 		// Note: Explicit delays are not synthesizable into logic gates
 ```
