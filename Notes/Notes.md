@@ -807,20 +807,20 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 		If there are no timing control statments within an always block, 
 		the simulation will hang because of a zero-delay infinite loop.	
 ```verilog
-		// There is no time control, and hence it will stay and
-		// be repeated at 0 time units only. This continues
-		// in a loop and simulation will hang
-		always clk = ~clk;
+// There is no time control, and hence it will stay and
+// be repeated at 0 time units only. This continues
+// in a loop and simulation will hang
+always clk = ~clk;
 
-		always #10 clk = ~clk;
-		// Note: Explicit delays are not synthesizable into logic gates
+always #10 clk = ~clk;
+// Note: Explicit delays are not synthesizable into logic gates
 ```
 		Hence real Verilog design code always require a sensitivity list.
 
 ### Combinational Logic with Always Block
 
 	1. Example #1 : Half Adder
-```verilog
+	```verilog
 	module ha(
 		output reg sum, cout,
 		input a, b
@@ -833,10 +833,10 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 		// wire cout,sum;
 		// assign {cout,sum} = a + b;
 	endmodule
-```
+	```
 	
 	2. Example #2 : Full Adder
-```verilog
+	```verilog
 	module fa(
 		output reg sum, cout,
 		input a, b, cin
@@ -845,12 +845,12 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 			{cout,sum} = a + b + cin;
 		end
 	endmodule
-```
+	```
 
 ### Sequential Logic with Always
 
 	1. JK Flip-Flop(typically implemented using NAND gates)
-```verilog
+	```verilog
 	// code
 	module jk_ff(
 		output reg q,
@@ -863,7 +863,7 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 				q <= (j & ~q) | (~k & q);
 		end
 	endmodule
-	
+
 	// testbench
 	`timescale 1ns / 1ns
 	module tb;
@@ -896,9 +896,9 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 		end
 		
 	endmodule	
-```
+	```
 	2. Modulo-10 counter
-```verilog
+	```verilog
 	// code
 	module modulo_10_counter(
 		output reg [3:0]	cnt,
@@ -916,7 +916,7 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 			end
 		end
 	endmodule
-	
+		
 	//testbench
 	`timescale 1ns / 1ns
 	module tb;
@@ -936,7 +936,7 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 		end
 		always #10 clk = ~clk;
 	endmodule
-```
+	```
 ### Initial Block
 	1. There are mainly two types of procedural block in Verilog: always and initial
 	2. An initial block is not synthesizable and hence cannot be converted into a hardware schematic with digital elements. These blocks are primarily used to initialize variables and drive design ports with specific values
@@ -948,81 +948,73 @@ There are two kinds of block statements: sequential and parallel
 		- begin...end
 	2. parallel
 		- fork...join
-```verilog
-		initial begin
-			#10 data = 8'hfe;
-			fork
-				#20 data = 8'h11;
-				#10 data = 8'h00;
-			join
-		end
-```
-```verilog
-		initial begin
-			#10 data = 8'hfe;
-			fork
-				#10 data = 8'h11;
-				begin
-					#20 data = 8'h00;
-					#30 data = 8'haa;
-				end
-			join
-		end
-```
+	```verilog
+	initial begin
+		#10 data = 8'hfe;
+		fork
+			#20 data = 8'h11;
+			#10 data = 8'h00;
+		join
+	end
+	```
+	```verilog
+	initial begin
+		#10 data = 8'hfe;
+		fork
+			#10 data = 8'h11;
+			begin
+				#20 data = 8'h00;
+				#30 data = 8'haa;
+			end
+		join
+	end
+	```
 	3. naming of blocks
-```verilog
+	```verilog
 	begin : block_name
 		//
 	end
-	
+
 	fork : block_name
 		//
 	join
-	
+
 	// By doing so, the block can be referenced in a "disable" statement
-```
+	```
 ### Assignments
 
 Placing values onto nets and variables are called assignments. There are three basic forms: **Procedural**,**Continuous**,**Procedural continous**
-
 - Procedural Assignment
-
 Procedural assignments occur within procedures such as **always**,**iniital**,**task**,and**functions** and are used to place values onto variables.The variable will hold the value until the next 
 assignment to the same variable.
-
 	- Variable declaration assignment
-	
-```verilog
+	```verilog
 	// If the variables is initialized during declaration and at time 0 in an initial block  as shown below, the order of evaluation is not guaranteed, and hence can have either 8'h05 or 8'h33.
 	module design;
 		reg [7:0] addr = 8'h05;
 		initial
 			addr = 8'hee;
 	endmodule
-```
-`reg [3:0] array [3:0] = 0; 	// Illegal`
+
+	reg [3:0] array [3:0] = 0; 	// Illegal
+	```
 	
 - Continuous Assignment
-
 This is used to assign values onto scalar and vector nets. It provides a way to model combinational logic without specifying an interconnection of gates  and make it easier to drive the net with
 logic expressions.
-
 - Procedural Continuous Assignment
-
 These are procedural statements that allow expressions to be continuously assigned to nets or variables and are of two types.
-
 	- assign...deassign
-	
 		This will override all procedural assignments to a variable and is deactivated by using the same signal with deassign. 
 		The value of the variable will remain same until the variable gets a new value through a procedural or procedural continuous assignment. 
 		The LHS of an assign statement cannot be a bit-select, part-select or an array reference but can be a variable or a concatenation of variables.
-```verilog
-		reg q;
-		initial begin
-			assign q = 0;
-			#10 deassign q;
-		end
-```
+	```verilog
+	reg q;
+	initial begin
+		assign q = 0;
+		#10 deassign q;
+	end
+	```
 		
 	- force...release
 		
@@ -1030,14 +1022,14 @@ These are procedural statements that allow expressions to be continuously assign
 		The LHS can be a bit-select of a net, part-select of a net, variable or a net but cannot be the reference to an array and bit/part select of a variable. 
 		The force statment will override all other assignments made to the variable until it is released using the release keyword.
 		
-```verilog
-		reg out, a, b;
-		initial begin
-			force out = a & b;
-			
-			release out;
-		end
-```
+	```verilog
+	reg out, a, b;
+	initial begin
+		force out = a & b;
+		
+		release out;
+	end
+	```
 		
 ### Blocking and Non-Blocking
 
@@ -1145,59 +1137,52 @@ endmodule
 - False includes : zero, X, Z
 - Hardware Implementation
 	- if without else
-	- if else if
-		
+	- if else if	
 		In the following example, the design module has a 4-bit output q that is incremented when mode is 1 and decrements when mode is 2 with if else construct. 
-		
 		Note that the description does not specify what has to be done if mode is 0 or 3 which are valid values for a 2-bit variable. 
-		
 		It is assumed that the circuit does nothing when mode is 1 and 3, but maintain exiting value of q.
-		
-		It is not recommended to leave such ambiguity in real design code, but is shown here to highlight the possibility.
-		
-```verilog
-		module des (
-			output reg [3:0] q,
-			input [1:0] mode,
-			input clk,
-			input rstn
-		);
-			always @ (posedge clk) begin
-				if (!rstn)
-				  q <= 0;
-				else begin			// 缺少mode == 0 和 mode == 3 的判断
-				  if (mode == 1)
+		It is not recommended to leave such ambiguity in real design code, but is shown here to highlight the possibility.	
+	```verilog
+	module des (
+		output reg [3:0] q,
+		input [1:0] mode,
+		input clk,
+		input rstn
+	);
+		always @ (posedge clk) begin
+			if (!rstn)
+			  q <= 0;
+			else begin			// 缺少mode == 0 和 mode == 3 的判断
+			  if (mode == 1)
+				q <= q + 1;
+			  else if (mode == 2)
+				q <= q - 1;
+			end
+		end
+	endmodule
+	```	
+	![](https://github.com/Spider-Viper/Picture/blob/main/if-else-if-1.PNG)	
+
+	```verilog
+	module des ( 
+		output reg [3:0] q,
+		input mode,
+		input clk,
+		input rstn
+	);
+		always @ (posedge clk) begin
+			if (! rstn)
+				q <= 0;
+			else begin
+				if (mode)
 					q <= q + 1;
-				  else if (mode == 2)
+				else
 					q <= q - 1;
-				end
 			end
-		endmodule
-```
-		
-![](https://github.com/Spider-Viper/Picture/blob/main/if-else-if-1.PNG)
-		
-```verilog
-		module des ( 
-			output reg [3:0] q,
-			input mode,
-			input clk,
-			input rstn
-		);
-			always @ (posedge clk) begin
-				if (! rstn)
-					q <= 0;
-				else begin
-					if (mode)
-						q <= q + 1;
-					else
-						q <= q - 1;
-				end
-			end
-		endmodule
-```
-		
-![](https://github.com/Spider-Viper/Picture/blob/main/if-else-if-2.PNG)
+		end
+	endmodule
+	```	
+	![](https://github.com/Spider-Viper/Picture/blob/main/if-else-if-2.PNG)
 		
 2. case statement
 - case,casez,casex
@@ -1210,10 +1195,8 @@ endmodule
 4. forever loop
 
 5. repeat loop
-
 	- This will execute statements a fixed number of times. If the expression evaluates to an X or Z, then it will be treated as zero and will not be executed at all.
-	
-```verilog
+	```verilog
 	repeat ([num_of_times]) begin
 		[statements]
 	end
@@ -1221,7 +1204,7 @@ endmodule
 	repeat ([num_of_times]) @ ([some_event]) begin
 		[statements]
 	end
-```
+	```
 	
 6. while loop
 
