@@ -782,9 +782,462 @@ endmodule
 		end
 	endmodule
 	```
+
+11. Conditional Operator
+
+- Nested Conditional Operators
+
+Conditional operators can be nested to any level but it can affect readability of code.
+
+```verilog
+// "y" is assigned to "out" when both "a < b" and "x % 2" are true
+// "z" is assigned to "out" when "a < b" is true and "x % 2" is false
+// 0 is assigned to "out" when "a < b" is false
+assign out = (a < b) ?  (x % 2) ? y : z : 0;
+// step 1 -> (a < b) ? []:0;
+// step 2 -> []
+	(x % 2)? y : z
+```
+
 ### Always Block
 
+	- An "always block" can be used to realize combinational or sequantial elements. 
+	- always块内被赋值的变量必须为reg类型
+	- What happens if there is no sensitivity list?
+	
+		 If there are no timing control statments within an always block, the simulation will hang because of a zero-delay infinite loop.
+		 ```verilog
+		// There is no time control, and hence it will stay and
+		// be repeated at 0 time units only. This continues
+		// in a loop and simulation will hang
+		always clk = ~clk;
+		 ```
+		```verilog
+		always #10 clk = ~clk;
+		// Note: Explicit delays are not synthesizable into logic gates
+		```
+		Hence real Verilog design code always require a sensitivity list.
 
-   
+### Combinational Logic with Always Block
+
+	1. Example #1 : Half Adder
+	```verilog
+	module ha(
+		output reg sum, cout,
+		input a, b
+	);
+		always @(*) begin
+			{cout,sum} = a + b;
+		end
+		
+		/************************************/
+		// wire cout,sum;
+		// assign {cout,sum} = a + b;
+	endmodule
+	```
+	
+	2. Example #2 : Full Adder
+	```verilog
+	module fa(
+		output reg sum, cout,
+		input a, b, cin
+	);
+		always @(*) begin
+			{cout,sum} = a + b + cin;
+		end
+	endmodule
+	```
+
+### Sequential Logic with Always
+
+	1. JK Flip-Flop(typically implemented using NAND gates)
+	```verilog
+	// code
+	module jk_ff(
+		output reg q,
+		input j,k,clk,rstn
+	);	
+		always @(posedge clk or negedge rstn) begin
+			if(!rstn)
+				q <= 1'b0;
+			else
+				q <= (j & ~q) | (~k & q);
+		end
+	endmodule
+	
+	// testbench
+	`timescale 1ns / 1ns
+	module tb;
+		reg j, k, clk, rstn;
+		wire q;
+		integer i;
+		
+		reg [2:0] delay;
+		
+		jk_ff UUT_0(
+			.q(q),
+			.j(j),
+			.k(k),
+			.clk(clk),
+			.rstn(rstn)
+		);
+		
+		always #10 clk = ~clk;
+		
+		initial begin
+			{j,k,clk,rstn} = 0;
+			#40
+			rstn = 1'b1;
+			
+			for(i = 0; i < 100; i = i + 1) begin
+				delay = $random;
+				#(delay) j = $random;
+				#(delay) k = $random;
+			end
+		end
+		
+	endmodule
+	
+	```
+	2. Modulo-10 counter
+	```verilog
+	// code
+	module modulo_10_counter(
+		output reg [3:0]	cnt,
+		input				clk,
+		input				rstn
+	);
+		always @(posedge clk) begin
+			if(!rstn)
+				cnt <= 4'b0000;
+			else begin
+				if(cnt == 4'd9)
+					cnt <= 4'b0000;
+				else
+					cnt <= cnt + 1'b1;
+			end
+		end
+	endmodule
+	
+	//testbench
+	`timescale 1ns / 1ns
+	module tb;
+		reg clk, rstn;
+		wire [3:0] cnt;
+		
+		modulo_10_counter UUT_0(
+			.cnt(cnt),
+			.clk(clk),
+			.rstn(rstn)
+		);
+		
+		initial begin
+			{clk,rstn} = 2'b0;
+			#50
+			rstn = 1'b1;
+		end
+		always #10 clk = ~clk;
+	endmodule
+	```
+### Initial Block
+	1. There are mainly two types of procedural block in Verilog - **always** and **initial**
+	2. An initial block is not synthesizable and hence cannot be converted into a hardware schematic with digital elements.
+	These blocks are primarily used to initialize variables and drive design ports with specific values
+### Generate Block
+	略
+### Behavioral Modeling
+There are two kinds of block statements: sequential and parallel
+	1. sequential
+		- begin...end
+	2. parallel
+		- fork...join
+		```verilog
+		initial begin
+			#10 data = 8'hfe;
+			fork
+				#20 data = 8'h11;
+				#10 data = 8'h00;
+			join
+		end
+		```
+		```verilog
+		initial begin
+			#10 data = 8'hfe;
+			fork
+				#10 data = 8'h11;
+				begin
+					#20 data = 8'h00;
+					#30 data = 8'haa;
+				end
+			join
+		end
+		```
+	3. naming of blocks
+	```verilog
+	begin : block_name
+		//
+	end
+	
+	fork : block_name
+		//
+	join
+	
+	// By doing so, the block can be referenced in a "disable" statement
+	```
+### Assignments
+
+Placing values onto nets and variables are called assignments. There are three basic forms: **Procedural**,**Continuous**,**Procedural continous**
+
+- Procedural Assignment
+
+Procedural assignments occur within procedures such as **always**,**iniital**,**task**,and**functions** and are used to place values onto variables.The variable will hold the value until the next 
+assignment to the same variable.
+
+	- Variable declaration assignment
+	
+	```verilog
+	// If the variables is initialized during declaration and at time 0 in an initial block  as shown below, the order of evaluation is not guaranteed, and hence can have either 8'h05 or 8'h33.
+	module design;
+		reg [7:0] addr = 8'h05;
+		initial
+			addr = 8'hee;
+	endmodule
+	```
+	`reg [3:0] array [3:0] = 0; 	// Illegal`
+	
+- Continuous Assignment
+
+This is used to assign values onto scalar and vector nets. It provides a way to model combinational logic without specifying an interconnection of gates  and make it easier to drive the net with
+logic expressions.
+
+- Procedural Continuous Assignment
+
+These are procedural statements that allow expressions to be continuously assigned to nets or variables and are of two types.
+
+	- assign...deassign
+	
+		This will override all procedural assignments to a variable and is deactivated by using the same signal with deassign. 
+		The value of the variable will remain same until the variable gets a new value through a procedural or procedural continuous assignment. 
+		The LHS of an assign statement cannot be a bit-select, part-select or an array reference but can be a variable or a concatenation of variables.
+		```verilog
+		reg q;
+		initial begin
+			assign q = 0;
+			#10 deassign q;
+		end
+		```
+		
+	- force...release
+		
+		These are similar to the assign - deassign statements but can also be applied to nets and variables. 
+		The LHS can be a bit-select of a net, part-select of a net, variable or a net but cannot be the reference to an array and bit/part select of a variable. 
+		The force statment will override all other assignments made to the variable until it is released using the release keyword.
+		
+		```verilog
+		reg out, a, b;
+		initial begin
+			force out = a & b;
+			
+			release out;
+		end
+		```
+		
+### Blocking and Non-Blocking
+
+- Non-Blocking
+
+```verilog
+module tb;
+  reg [7:0] a, b, c, d, e;
+
+  initial begin
+    a <= 8'hDA;
+    $display ("[%0t] a=0x%0h b=0x%0h c=0x%0h", $time, a, b, c);
+    b <= 8'hF1;
+    $display ("[%0t] a=0x%0h b=0x%0h c=0x%0h", $time, a, b, c);
+    c <= 8'h30;
+    $display ("[%0t] a=0x%0h b=0x%0h c=0x%0h", $time, a, b, c);
+  end
+
+  initial begin
+    d <= 8'hAA;
+    $display ("[%0t] d=0x%0h e=0x%0h", $time, d, e);
+ 	e <= 8'h55;
+    $display ("[%0t] d=0x%0h e=0x%0h", $time, d, e);
+  end
+endmodule
+```
+```verilog
+/*
+|__ Spawn Block1: initial
+|      |___ Time #0ns : a <= 8'DA, is non-blocking so note value of RHS (8'hDA) and execute next step
+|      |___ Time #0ns : $display() is blocking, so execute this statement: But a hasn't received new values so a=8'hx
+|      |___ Time #0ns : b <= 8'F1, is non-blocking so note value of RHS (8'hF1) and execute next step
+|      |___ Time #0ns : $display() is blocking, so execute this statement. But b hasn't received new values so b=8'hx
+|      |___ Time #0ns : c <= 8'30, is non-blocking so note value of RHS (8'h30) and execute next step
+|      |___ Time #0ns : $display() is blocking, so execute this statement. But c hasn't received new values so c=8'hx
+|      |___ End of time-step and initial block, assign captured values into variables a, b, c
+|
+|__ Spawn Block2: initial
+|      |___ Time #0ns : d <= 8'AA, is non-blocking so note value of RHS (8'hAA) and execute next step
+|      |___ Time #0ns : $display() is blocking, so execute this statement: But d hasn't received new values so d=8'hx
+|      |___ Time #0ns : e <= 8'55, is non-blocking so note value of RHS (8'h55) and execute next step
+|      |___ Time #0ns : $display() is blocking, so execute this statement. But e hasn't received new values so e=8'hx
+|      |___ End of time-step and initial block, assign captured values into variables d and e
+|
+|__ End of simulation at #0ns
+*/
+```
+
+```verilog
+module tb;
+  reg [7:0] a, b, c, d, e;
+
+  initial begin
+    a <= 8'hDA;
+    $display ("[%0t] a=0x%0h b=0x%0h c=0x%0h", $time, a, b, c);
+    #10 b <= 8'hF1;
+    $display ("[%0t] a=0x%0h b=0x%0h c=0x%0h", $time, a, b, c);
+    c <= 8'h30;
+    $display ("[%0t] a=0x%0h b=0x%0h c=0x%0h", $time, a, b, c);
+  end
+
+  initial begin
+    #5 d <= 8'hAA;
+    $display ("[%0t] d=0x%0h e=0x%0h", $time, d, e);
+ 	#5 e <= 8'h55;
+    $display ("[%0t] d=0x%0h e=0x%0h", $time, d, e);
+  end
+endmodule
+```
+```verilog
+/*
+|__ Spawn Block1 at #0ns: initial
+|      |___ Time #0ns : a <= 8'DA, is non-blocking so note value of RHS (8'hDA) and execute next step
+|      |___ Time #0ns : $display() is blocking, so execute this statement: But a hasn't received new values so a=8'hx
+|      |___ End of time-step : Assign captured value to variable a, and a is now 8'hDA
+|      |___ Wait until time advances by 10 time-units to #10ns
+|	
+|      |___ Time #10ns : b <= 8'F1, is non-blocking so note value of RHS (8'hF1) and execute next step
+|      |___ Time #10ns : $display() is blocking, so execute this statement. But b hasn't received new values so b=8'hx
+|	   |___ Time #10ns : c <= 8'30, is non-blocking so note value of RHS (8'h30) and execute next step
+|      |___ Time #10ns : $display() is blocking, so execute this statement. But c hasn't received new values so c=8'hx
+|      |___ End of time-step and initial block, assign captured values into variables b, c
+|	
+|__ Spawn Block2 at #0ns: initial
+|      |___ Wait until time advances by 5 time-units to #5ns
+|	
+|      |___ Time #5ns : d <= 8'AA, is non-blocking so note value of RHS (8'hAA) and execute next step
+|      |___ Time #5ns : $display() is blocking, so execute this statement: But d hasn't received new values so d=8'hx
+|      |___ End of time-step : Assign captured value to variable d, and d is now 8'hAA
+|      |___ Wait until time advances by 5 time-units to #5ns
+|	
+|      |___ Time #10ns : e <= 8'55, is non-blocking so note value of RHS (8'h55) and execute next step
+|      |___ Time #10ns : $display() is blocking, so execute this statement. But e hasn't received new values so e=8'hx
+|      |___ End of time-step and initial block, assign captured values to variable e, and e is now 8'h55
+|
+|__ End of simulation at #10ns
+*/
+```
+
+### Control Blocks
+
+1. if-else-if
+
+- 注意优先级！！！
+- False includes : zero, X, Z
+- Hardware Implementation
+	- if without else
+	- if else if
+		
+		In the following example, the design module has a 4-bit output q that is incremented when mode is 1 and decrements when mode is 2 with if else construct. 
+		
+		
+		Note that the description does not specify what has to be done if mode is 0 or 3 which are valid values for a 2-bit variable. 
+		
+		
+		It is assumed that the circuit does nothing when mode is 1 and 3, but maintain exiting value of q.
+		
+		It is not recommended to leave such ambiguity in real design code, but is shown here to highlight the possibility.
+		
+		```verilog
+		module des (
+			output reg [3:0] q,
+			input [1:0] mode,
+			input clk,
+			input rstn
+		);
+			always @ (posedge clk) begin
+				if (!rstn)
+				  q <= 0;
+				else begin			// 缺少mode == 0 和 mode == 3 的判断
+				  if (mode == 1)
+					q <= q + 1;
+				  else if (mode == 2)
+					q <= q - 1;
+				end
+			end
+		endmodule
+		```
+		
+		![](https://github.com/Spider-Viper/Picture/blob/main/if-else-if-1.PNG)
+		
+		```verilog
+		module des ( 
+			output reg [3:0] q,
+			input mode,
+			input clk,
+			input rstn
+		);
+			always @ (posedge clk) begin
+				if (! rstn)
+					q <= 0;
+				else begin
+					if (mode)
+						q <= q + 1;
+					else
+						q <= q - 1;
+				end
+			end
+		endmodule
+		```
+		
+		![](https://github.com/Spider-Viper/Picture/blob/main/if-else-if-2.PNG)
+		
+2. case statement
+- case,casez,casex
+- Difference between if-else-if and case
+	- Expressions given in a if-else block are more general while in a case block, a single expression is matched with multiple items.
+	- Case will provide a definitive result when there are X and Z values in an expression.
+
+3. for loop
+
+4. forever loop
+
+5. repeat loop
+
+	- This will execute statements a fixed number of times. If the expression evaluates to an X or Z, then it will be treated as zero and will not be executed at all.
+	
+	```verilog
+	repeat ([num_of_times]) begin
+		[statements]
+	end
+
+	repeat ([num_of_times]) @ ([some_event]) begin
+		[statements]
+	end
+	```
+	
+6. while loop
+
+
+
+
+
+
+
+
+
+
    
    
