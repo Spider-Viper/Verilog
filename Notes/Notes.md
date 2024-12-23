@@ -806,7 +806,8 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 	- What happens if there is no sensitivity list?
 	
 		 If there are no timing control statments within an always block, the simulation will hang because of a zero-delay infinite loop.
-		 ```verilog
+		
+		```verilog
 		// There is no time control, and hence it will stay and
 		// be repeated at 0 time units only. This continues
 		// in a loop and simulation will hang
@@ -816,6 +817,7 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 		always #10 clk = ~clk;
 		// Note: Explicit delays are not synthesizable into logic gates
 		```
+		
 		Hence real Verilog design code always require a sensitivity list.
 
 ### Combinational Logic with Always Block
