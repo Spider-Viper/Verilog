@@ -815,11 +815,11 @@ always clk = ~clk;
 always #10 clk = ~clk;
 // Note: Explicit delays are not synthesizable into logic gates
 ```
-		Hence real Verilog design code always require a sensitivity list.
+	Hence real Verilog design code always require a sensitivity list.
 
 ### Combinational Logic with Always Block
 
-	1. Example #1 : Half Adder
+	- Example #1 : Half Adder
 	```verilog
 	module ha(
 		output reg sum, cout,
@@ -835,7 +835,7 @@ always #10 clk = ~clk;
 	endmodule
 	```
 	
-	2. Example #2 : Full Adder
+	- Example #2 : Full Adder
 	```verilog
 	module fa(
 		output reg sum, cout,
@@ -849,7 +849,7 @@ always #10 clk = ~clk;
 
 ### Sequential Logic with Always
 
-	1. JK Flip-Flop(typically implemented using NAND gates)
+	- **JK Flip-Flop(typically implemented using NAND gates)**
 	```verilog
 	// code
 	module jk_ff(
@@ -897,7 +897,7 @@ always #10 clk = ~clk;
 		
 	endmodule	
 	```
-	2. Modulo-10 counter
+	-  **Modulo-10 counter**
 	```verilog
 	// code
 	module modulo_10_counter(
@@ -944,9 +944,9 @@ always #10 clk = ~clk;
 	略
 ### Behavioral Modeling
 There are two kinds of block statements: sequential and parallel
-	1. sequential
+	- sequential
 		- begin...end
-	2. parallel
+	- parallel
 		- fork...join
 	```verilog
 	initial begin
@@ -969,7 +969,7 @@ There are two kinds of block statements: sequential and parallel
 		join
 	end
 	```
-	3. naming of blocks
+	- naming of blocks
 	```verilog
 	begin : block_name
 		//
