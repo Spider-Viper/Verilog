@@ -849,7 +849,7 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 
 ### Sequential Logic with Always
 
-	1. **JK Flip-Flop(typically implemented using NAND gates)**
+	1. **JK\ Flip-Flop(typically\ implemented\ using\ NAND\ gates)**
 ```verilog
 	// code
 	module jk_ff(
@@ -897,7 +897,7 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 		
 	endmodule	
 ```
-	2. **Modulo-10 counter**
+	2. **Modulo-10\ counter**
 ```verilog
 	// code
 	module modulo_10_counter(
@@ -938,7 +938,7 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 	endmodule
 ```
 ### Initial Block
-	1. There are mainly two types of procedural block in Verilog : **always** and **initial**
+	1. There are mainly two types of procedural block in Verilog: **always**and**initial**
 	2. An initial block is not synthesizable and hence cannot be converted into a hardware schematic with digital elements. These blocks are primarily used to initialize variables and drive design ports with specific values
 ### Generate Block
 	略
@@ -1149,9 +1149,7 @@ endmodule
 		
 		In the following example, the design module has a 4-bit output q that is incremented when mode is 1 and decrements when mode is 2 with if else construct. 
 		
-		
 		Note that the description does not specify what has to be done if mode is 0 or 3 which are valid values for a 2-bit variable. 
-		
 		
 		It is assumed that the circuit does nothing when mode is 1 and 3, but maintain exiting value of q.
 		
