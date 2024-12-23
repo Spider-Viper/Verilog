@@ -943,9 +943,9 @@ always #10 clk = ~clk;
 ### Behavioral Modeling
 There are two kinds of block statements: sequential and parallel
 - sequential
-	begin...end
+	- begin...end
 - parallel
-	fork...join
+	- fork...join
 	```verilog
 	initial begin
 		#10 data = 8'hfe;
