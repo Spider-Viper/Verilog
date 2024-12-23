@@ -820,7 +820,7 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 ### Combinational Logic with Always Block
 
 	1. Example #1 : Half Adder
-	```verilog
+```verilog
 	module ha(
 		output reg sum, cout,
 		input a, b
@@ -833,10 +833,10 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 		// wire cout,sum;
 		// assign {cout,sum} = a + b;
 	endmodule
-	```
+```
 	
 	2. Example #2 : Full Adder
-	```verilog
+```verilog
 	module fa(
 		output reg sum, cout,
 		input a, b, cin
@@ -845,12 +845,12 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 			{cout,sum} = a + b + cin;
 		end
 	endmodule
-	```
+```
 
 ### Sequential Logic with Always
 
-	1. JK Flip-Flop(typically implemented using NAND gates)
-	```verilog
+	1. **JK Flip-Flop(typically implemented using NAND gates)**
+```verilog
 	// code
 	module jk_ff(
 		output reg q,
@@ -895,11 +895,10 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 			end
 		end
 		
-	endmodule
-	
-	```
-	2. Modulo-10 counter
-	```verilog
+	endmodule	
+```
+	2. **Modulo-10 counter**
+```verilog
 	// code
 	module modulo_10_counter(
 		output reg [3:0]	cnt,
@@ -937,11 +936,10 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 		end
 		always #10 clk = ~clk;
 	endmodule
-	```
+```
 ### Initial Block
-	1. There are mainly two types of procedural block in Verilog - **always** and **initial**
-	2. An initial block is not synthesizable and hence cannot be converted into a hardware schematic with digital elements.
-	These blocks are primarily used to initialize variables and drive design ports with specific values
+	1. There are mainly two types of procedural block in Verilog : **always** and **initial**
+	2. An initial block is not synthesizable and hence cannot be converted into a hardware schematic with digital elements. These blocks are primarily used to initialize variables and drive design ports with specific values
 ### Generate Block
 	略
 ### Behavioral Modeling
@@ -950,7 +948,7 @@ There are two kinds of block statements: sequential and parallel
 		- begin...end
 	2. parallel
 		- fork...join
-		```verilog
+```verilog
 		initial begin
 			#10 data = 8'hfe;
 			fork
@@ -958,8 +956,8 @@ There are two kinds of block statements: sequential and parallel
 				#10 data = 8'h00;
 			join
 		end
-		```
-		```verilog
+```
+```verilog
 		initial begin
 			#10 data = 8'hfe;
 			fork
@@ -970,9 +968,9 @@ There are two kinds of block statements: sequential and parallel
 				end
 			join
 		end
-		```
+```
 	3. naming of blocks
-	```verilog
+```verilog
 	begin : block_name
 		//
 	end
@@ -982,7 +980,7 @@ There are two kinds of block statements: sequential and parallel
 	join
 	
 	// By doing so, the block can be referenced in a "disable" statement
-	```
+```
 ### Assignments
 
 Placing values onto nets and variables are called assignments. There are three basic forms: **Procedural**,**Continuous**,**Procedural continous**
@@ -994,15 +992,15 @@ assignment to the same variable.
 
 	- Variable declaration assignment
 	
-	```verilog
+```verilog
 	// If the variables is initialized during declaration and at time 0 in an initial block  as shown below, the order of evaluation is not guaranteed, and hence can have either 8'h05 or 8'h33.
 	module design;
 		reg [7:0] addr = 8'h05;
 		initial
 			addr = 8'hee;
 	endmodule
-	```
-	`reg [3:0] array [3:0] = 0; 	// Illegal`
+```
+`reg [3:0] array [3:0] = 0; 	// Illegal`
 	
 - Continuous Assignment
 
@@ -1018,13 +1016,13 @@ These are procedural statements that allow expressions to be continuously assign
 		This will override all procedural assignments to a variable and is deactivated by using the same signal with deassign. 
 		The value of the variable will remain same until the variable gets a new value through a procedural or procedural continuous assignment. 
 		The LHS of an assign statement cannot be a bit-select, part-select or an array reference but can be a variable or a concatenation of variables.
-		```verilog
+```verilog
 		reg q;
 		initial begin
 			assign q = 0;
 			#10 deassign q;
 		end
-		```
+```
 		
 	- force...release
 		
@@ -1032,14 +1030,14 @@ These are procedural statements that allow expressions to be continuously assign
 		The LHS can be a bit-select of a net, part-select of a net, variable or a net but cannot be the reference to an array and bit/part select of a variable. 
 		The force statment will override all other assignments made to the variable until it is released using the release keyword.
 		
-		```verilog
+```verilog
 		reg out, a, b;
 		initial begin
 			force out = a & b;
 			
 			release out;
 		end
-		```
+```
 		
 ### Blocking and Non-Blocking
 
@@ -1159,7 +1157,7 @@ endmodule
 		
 		It is not recommended to leave such ambiguity in real design code, but is shown here to highlight the possibility.
 		
-		```verilog
+```verilog
 		module des (
 			output reg [3:0] q,
 			input [1:0] mode,
@@ -1177,11 +1175,11 @@ endmodule
 				end
 			end
 		endmodule
-		```
+```
 		
 		![](https://github.com/Spider-Viper/Picture/blob/main/if-else-if-1.PNG)
 		
-		```verilog
+```verilog
 		module des ( 
 			output reg [3:0] q,
 			input mode,
@@ -1199,7 +1197,7 @@ endmodule
 				end
 			end
 		endmodule
-		```
+```
 		
 		![](https://github.com/Spider-Viper/Picture/blob/main/if-else-if-2.PNG)
 		
@@ -1217,7 +1215,7 @@ endmodule
 
 	- This will execute statements a fixed number of times. If the expression evaluates to an X or Z, then it will be treated as zero and will not be executed at all.
 	
-	```verilog
+```verilog
 	repeat ([num_of_times]) begin
 		[statements]
 	end
@@ -1225,7 +1223,7 @@ endmodule
 	repeat ([num_of_times]) @ ([some_event]) begin
 		[statements]
 	end
-	```
+```
 	
 6. while loop
 
