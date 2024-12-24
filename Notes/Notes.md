@@ -1189,7 +1189,9 @@ endmodule
 	- Case will provide a definitive result when there are X and Z values in an expression.
 
 ##### for loop
-
+- Design Example
+	Let us take a look at how an 8-bit left shift register can be implemented in Verilog without a **for** loop and then compare it with the code using a **for** loop just to appreciate the utility of a looping construct.
+	
 ##### forever loop
 
 ##### repeat loop
