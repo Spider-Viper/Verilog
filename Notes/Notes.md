@@ -983,11 +983,12 @@ There are two kinds of block statements: sequential and parallel
 
 Placing values onto nets and variables are called assignments. There are three basic forms: **Procedural**,**Continuous**,**Procedural continous**
 - Procedural Assignment
-Procedural assignments occur within procedures such as **always**,**iniital**,**task**,and**functions** and are used to place values onto variables.The variable will hold the value until the next 
+
+Procedural assignments occur within procedures such as **always**,**iniital**,**task**,and **functions** and are used to place values onto variables.The variable will hold the value until the next 
 assignment to the same variable.
 	- Variable declaration assignment
 	```verilog
-	// If the variables is initialized during declaration and at time 0 in an initial block  as shown below, the order of evaluation is not guaranteed, and hence can have either 8'h05 or 8'h33.
+	// If the variables is initialized during declaration and at time 0 in an initial block as shown below, the order of evaluation is not guaranteed, and hence can have either 8'h05 or 8'h33.
 	module design;
 		reg [7:0] addr = 8'h05;
 		initial
@@ -998,11 +999,14 @@ assignment to the same variable.
 	```
 	
 - Continuous Assignment
+
 This is used to assign values onto scalar and vector nets. It provides a way to model combinational logic without specifying an interconnection of gates  and make it easier to drive the net with
 logic expressions.
 - Procedural Continuous Assignment
+
 These are procedural statements that allow expressions to be continuously assigned to nets or variables and are of two types.
 	- assign...deassign
+
 		This will override all procedural assignments to a variable and is deactivated by using the same signal with deassign. 
 		The value of the variable will remain same until the variable gets a new value through a procedural or procedural continuous assignment. 
 		The LHS of an assign statement cannot be a bit-select, part-select or an array reference but can be a variable or a concatenation of variables.
@@ -1135,7 +1139,8 @@ endmodule
 - False includes : zero, X, Z
 - Hardware Implementation
 	- if without else
-	- if else if	
+	- if else if
+
 		In the following example, the design module has a 4-bit output q that is incremented when mode is 1 and decrements when mode is 2 with if else construct. 
 		Note that the description does not specify what has to be done if mode is 0 or 3 which are valid values for a 2-bit variable. 
 		It is assumed that the circuit does nothing when mode is 1 and 3, but maintain exiting value of q.
@@ -1223,7 +1228,6 @@ endmodule
 	endmodule
 	```
 	The same behavior can be implemented using a **for** loop which will reduce the code and make it scalable for different register widths. If the width of the register is made a verilog parameter,
-	
 	the design module will become scalable and the same parameter can be used inside the **for** loop.
 	```verilog
 	module left_shift_register(
@@ -1242,7 +1246,7 @@ endmodule
 					out <= load_val;
 				else begin
 					for(i = 0; i < 8; i = i + 1) begin
-						out[i + 1] <= op[i];
+						out[i + 1] <= out[i];
 					end
 					out[0] <= out[7];
 				end
@@ -1283,12 +1287,13 @@ endmodule
 			load_en <= 1'b1;
 			repeat (1) @(posedge clk);
 			load_en <= 1'b0;
-			
+
 			// Let design run for 20 clocks and then finish
 			repeat (20) @(posedge clk);
 			$finish;
 		end
 	endmodule
+	// 使用非阻塞赋值?????
 	```
 ##### forever loop
 
@@ -1305,6 +1310,9 @@ endmodule
 	```
 	
 ##### while loop
+
+### Parameters
+
 
 
 
