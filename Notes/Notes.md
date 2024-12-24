@@ -1191,9 +1191,104 @@ endmodule
 ##### for loop
 - Design Example
 	Let us take a look at how an 8-bit left shift register can be implemented in Verilog without a **for** loop and then compare it with the code using a **for** loop just to appreciate the utility of a looping construct.
-	
 	```verilog
+	module left_shift_register(
+		output reg 	[7:0] 	out,
+		input		[7:0]	load_val,	// Load Value
+		input				load_en,	// Load Enable
+		input				clk,
+		input				rstn
+	);
+	// If rstn is high, load new value to out port if load_en=1
+	// If rstn is high, and load_en=0 shift register to left
+	always @(posedge cld) begin
+		if(!rstn)
+			out <= 8'b0;
+		else begin
+			if(load_en)
+				out <= load_val;
+			else begin
+				out[0] <= out[7];
+				out[1] <= out[0];
+				out[2] <= out[1];
+				out[3] <= out[2];
+				out[4] <= out[3];
+				out[5] <= out[4];
+				out[6] <= out[5];
+				out[7] <= out[6];
+			end
+		end
+	end
 	
+	endmodule
+	```
+	The same behavior can be implemented using a **for** loop which will reduce the code and make it scalable for different register widths. If the width of the register is made a verilog parameter,
+	
+	the design module will become scalable and the same parameter can be used inside the **for** loop.
+	```verilog
+	module left_shift_register(
+		output reg 	[7:0]	out,
+		input		[7:0]	load_val,
+		input				load_en,
+		input				clk,
+		input				rstn
+	);
+		integer i;
+		always @(posedge clk) begin
+			if(!rstn)
+				out <= 8'b0;
+			else begin
+				if(load_en)
+					out <= load_val;
+				else begin
+					for(i = 0; i < 8; i = i + 1) begin
+						out[i + 1] <= op[i];
+					end
+					out[0] <= out[7];
+				end
+			end
+		end
+	endmodule
+	```
+	```verilog
+	// Testbench
+	`timescale 1ns / 1ns
+	module tb;
+		reg [7:0] load_val;
+		reg	load_en, clk, rstn;
+		wire [7:0] out;
+		
+		left_shift_register UUT_0(
+			.out(out),
+			.load_val(load_val),
+			.load_en(load_en),
+			.clk(clk),
+			.rstn(rstn)
+		);
+		
+		always #10 clk = ~clk;
+		
+		initial begin
+			clk <= 1'b0;
+			rstn <= 1'b0;
+			load_val <= 8'b0000_0001;
+			load_en <= 1'b0;
+			
+			// Apply reset to design
+			repeat (2) @(posedge clk);
+			rstn <= 1;
+			repeat (5) @(posedge clk);
+			
+			// Set load_en for 1 clock so that load_val is loaded
+			load_en <= 1'b1;
+			repeat (1) @(posedge clk);
+			load_en <= 1'b0;
+			
+			// Let design run for 20 clocks and then finish
+			repeat (20) @(posedge clk);
+			$finish;
+		end
+	endmodule
 	```
 ##### forever loop
 
@@ -1210,8 +1305,6 @@ endmodule
 	```
 	
 ##### while loop
-
-
 
 
 
