@@ -1129,7 +1129,7 @@ endmodule
 
 ### Control Blocks
 
-1. if-else-if
+##### if-else-if
 
 - 注意优先级！！！
 - False includes : zero, X, Z
@@ -1182,17 +1182,17 @@ endmodule
 	```	
 	![](https://github.com/Spider-Viper/Picture/blob/main/if-else-if-2.PNG)
 		
-2. case statement
+##### case statement
 - case,casez,casex
 - Difference between if-else-if and case
 	- Expressions given in a if-else block are more general while in a case block, a single expression is matched with multiple items.
 	- Case will provide a definitive result when there are X and Z values in an expression.
 
-3. for loop
+##### for loop
 
-4. forever loop
+##### forever loop
 
-5. repeat loop
+##### repeat loop
 	- This will execute statements a fixed number of times. If the expression evaluates to an X or Z, then it will be treated as zero and will not be executed at all.
 	```verilog
 	repeat ([num_of_times]) begin
@@ -1204,7 +1204,7 @@ endmodule
 	end
 	```
 	
-6. while loop
+##### while loop
 
 
 
