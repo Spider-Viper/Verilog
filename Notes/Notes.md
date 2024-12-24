@@ -1192,6 +1192,9 @@ endmodule
 - Design Example
 	Let us take a look at how an 8-bit left shift register can be implemented in Verilog without a **for** loop and then compare it with the code using a **for** loop just to appreciate the utility of a looping construct.
 	
+	```verilog
+	
+	```
 ##### forever loop
 
 ##### repeat loop
