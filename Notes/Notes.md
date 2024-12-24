@@ -1194,15 +1194,15 @@ endmodule
 
 ##### repeat loop
 - This will execute statements a fixed number of times. If the expression evaluates to an X or Z, then it will be treated as zero and will not be executed at all.
-```verilog
-repeat ([num_of_times]) begin
-	[statements]
-end
+	```verilog
+	repeat ([num_of_times]) begin
+		[statements]
+	end
 
-repeat ([num_of_times]) @ ([some_event]) begin
-	[statements]
-end
-```
+	repeat ([num_of_times]) @ ([some_event]) begin
+		[statements]
+	end
+	```
 	
 ##### while loop
 
