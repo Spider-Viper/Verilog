@@ -1005,7 +1005,7 @@ logic expressions.
 - Procedural Continuous Assignment
 
 These are procedural statements that allow expressions to be continuously assigned to nets or variables and are of two types.
-	- assign...deassign
+- assign...deassign
 	This will override all procedural assignments to a variable and is deactivated by using the same signal with deassign. 
 	The value of the variable will remain same until the variable gets a new value through a procedural or procedural continuous assignment. 
 	The LHS of an assign statement cannot be a bit-select, part-select or an array reference but can be a variable or a concatenation of variables.
@@ -1016,7 +1016,7 @@ These are procedural statements that allow expressions to be continuously assign
 		#10 deassign q;
 	end
 	```	
-	- force...release
+- force...release
 	These are similar to the assign - deassign statements but can also be applied to nets and variables. 
 	The LHS can be a bit-select of a net, part-select of a net, variable or a net but cannot be the reference to an array and bit/part select of a variable. 
 	The force statment will override all other assignments made to the variable until it is released using the release keyword.	
