@@ -980,30 +980,24 @@ There are two kinds of block statements: sequential and parallel
 	// By doing so, the block can be referenced in a "disable" statement
 	```
 ### Assignments
-
 Placing values onto nets and variables are called assignments. There are three basic forms: **Procedural**,**Continuous**,**Procedural continous**
 - Procedural Assignment
+Procedural assignments occur within procedures such as **always**,**iniital**,**task**,and **functions** and are used to place values onto variables.The variable will hold the value until the next assignment to the same variable.
+- Variable declaration assignment
+```verilog
+// If the variables is initialized during declaration and at time 0 in an initial block as shown below, the order of evaluation is not guaranteed, and hence can have either 8'h05 or 8'h33.
+module design;
+	reg [7:0] addr = 8'h05;
+	initial
+		addr = 8'hee;
+endmodule
 
-Procedural assignments occur within procedures such as **always**,**iniital**,**task**,and **functions** and are used to place values onto variables.The variable will hold the value until the next 
-assignment to the same variable.
-	- Variable declaration assignment
-	```verilog
-	// If the variables is initialized during declaration and at time 0 in an initial block as shown below, the order of evaluation is not guaranteed, and hence can have either 8'h05 or 8'h33.
-	module design;
-		reg [7:0] addr = 8'h05;
-		initial
-			addr = 8'hee;
-	endmodule
-
-	reg [3:0] array [3:0] = 0; 	// Illegal
-	```
-	
+reg [3:0] array [3:0] = 0; 	// Illegal
+```
 - Continuous Assignment
-
 This is used to assign values onto scalar and vector nets. It provides a way to model combinational logic without specifying an interconnection of gates  and make it easier to drive the net with
 logic expressions.
 - Procedural Continuous Assignment
-
 These are procedural statements that allow expressions to be continuously assigned to nets or variables and are of two types.
 - assign...deassign
 	This will override all procedural assignments to a variable and is deactivated by using the same signal with deassign. 
@@ -1015,7 +1009,7 @@ These are procedural statements that allow expressions to be continuously assign
 		assign q = 0;
 		#10 deassign q;
 	end
-	```	
+	```
 - force...release
 	These are similar to the assign - deassign statements but can also be applied to nets and variables. 
 	The LHS can be a bit-select of a net, part-select of a net, variable or a net but cannot be the reference to an array and bit/part select of a variable. 
@@ -1028,11 +1022,8 @@ These are procedural statements that allow expressions to be continuously assign
 		release out;
 	end
 	```
-		
 ### Blocking and Non-Blocking
-
 - Non-Blocking
-
 ```verilog
 module tb;
   reg [7:0] a, b, c, d, e;
@@ -1075,7 +1066,6 @@ endmodule
 |__ End of simulation at #0ns
 */
 ```
-
 ```verilog
 module tb;
   reg [7:0] a, b, c, d, e;
@@ -1126,17 +1116,13 @@ endmodule
 |__ End of simulation at #10ns
 */
 ```
-
 ### Control Blocks
-
 ##### if-else-if
-
 - 注意优先级！！！
 - False includes : zero, X, Z
 - Hardware Implementation
 	- if without else
 	- if else if
-
 		In the following example, the design module has a 4-bit output q that is incremented when mode is 1 and decrements when mode is 2 with if else construct. 
 		Note that the description does not specify what has to be done if mode is 0 or 3 which are valid values for a 2-bit variable. 
 		It is assumed that the circuit does nothing when mode is 1 and 3, but maintain exiting value of q.
@@ -1188,7 +1174,6 @@ endmodule
 - Difference between if-else-if and case
 	- Expressions given in a if-else block are more general while in a case block, a single expression is matched with multiple items.
 	- Case will provide a definitive result when there are X and Z values in an expression.
-
 ##### for loop
 - Design Example
 	Let us take a look at how an 8-bit left shift register can be implemented in Verilog without a **for** loop and then compare it with the code using a **for** loop just to appreciate the utility of a looping construct.
@@ -1220,11 +1205,9 @@ endmodule
 			end
 		end
 	end
-	
 	endmodule
 	```
-	The same behavior can be implemented using a **for** loop which will reduce the code and make it scalable for different register widths. If the width of the register is made a verilog parameter,
-	the design module will become scalable and the same parameter can be used inside the **for** loop.
+	The same behavior can be implemented using a **for** loop which will reduce the code and make it scalable for different register widths. If the width of the register is made a verilog parameter,the design module will become scalable and the same parameter can be used inside the **for** loop.
 	```verilog
 	module left_shift_register(
 		output reg 	[7:0]	out,
@@ -1292,7 +1275,7 @@ endmodule
 	// 使用非阻塞赋值?????
 	```
 ##### forever loop
-
+略
 ##### repeat loop
 - This will execute statements a fixed number of times. If the expression evaluates to an X or Z, then it will be treated as zero and will not be executed at all.
 	```verilog
@@ -1303,10 +1286,9 @@ endmodule
 	repeat ([num_of_times]) @ ([some_event]) begin
 		[statements]
 	end
-	```
-	
+	```	
 ##### while loop
-
+略
 ### Parameters
 Parameters are Verilog constructs that allow a module to be reused with a different
 specification.
@@ -1342,7 +1324,6 @@ module design_ip #(
 	input [BUS_WIDTH-1:0]	addr,
 	...
 );
-
 endmodule
 ```
 - overriding parameters
