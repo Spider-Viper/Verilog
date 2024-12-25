@@ -1312,7 +1312,191 @@ endmodule
 ##### while loop
 
 ### Parameters
+Parameters are Verilog constructs that allow a module to be reused with a different
+specification.
 
+Parameters are basically constants and hence it's illegal to modify their value at runtime.
+
+##### Module Parameters
+Module parameters can be used to override parameter definitions within a module and this makes the module have a different set of parameters at compile time.
+
+A parameter can be modified with the **defparam** statement or in the module instance statement.
+- style:
+```verilog
+// 1995 style
+module design_ip(
+	addr, wdata, write, sel, rdata
+);
+	parameter 	BUS_WIDTH = 32,
+	parameter	DATA_WIDTH = 64,
+	parameter	FIFO_DEPTH = 512;
+
+	input addr;
+	input wdata;
+	...
+endmodule
+```
+```verilog
+// new style
+module design_ip #(
+	parameter BUS_WIDTH = 32,
+	parameter DATA_WIDTH = 64,
+	parameter FIFO_DEPTH = 512
+)(
+	input [BUS_WIDTH-1:0]	addr,
+	...
+);
+
+endmodule
+```
+- overriding parameters
+	```verilog
+	module design;
+		// 方式一：
+		design_ip #(BUS_WIDTH = 64, DATA_WIDTH = 128) d0 (...);
+		// 方式二：
+		defparam d0.FIFO_DEPTH = 128;
+	endmodule
+	```
+	Example:
+	```verilog
+	// 2-bit up-counter
+	module counter #(
+		parameter N = 2,
+		parameter DOWN = 0
+	)(
+		output reg [N-1:0] out,
+		input	en,
+		input	rstn,
+		input	clk
+	);
+		always @(posedge clk) begin
+			if(!rstn)
+				out <= 0;
+			else begin
+				if(en) begin
+					if(DOWN)
+						out <= out - 1;
+					else
+						out <= out + 1;
+				end
+				else
+					out <= out;
+			end
+		end
+	endmodule
+	// top module
+	module design_top(
+		output [1:0] out,
+		input	en,
+		input	rstn,
+		input	clk
+	);
+		counter #(.N(2)) u0(
+			.out(out),
+			.en(en),
+			.rstn(rstn),
+			.clk(clk)
+		);
+	endmodule
+	```
+	```verilog
+	// 4-bit down-counter
+	module design_top(
+		output [3:0] out,
+		input	en,
+		input	rstn,
+		input	clk
+	);
+		counter #(.N(4),.DOWN(1)) u0(
+			.out(out),
+			.en(en),
+			.rstn(rstn),
+			.clk(clk)
+		);
+	endmodule
+	```
+##### Local Parameters
+Local parameters cannot be modified or overridden from outside the module using defparam. This feature ensures that the values assigned to localparams remain constant throughout the module's lifetime, providing a way to protect critical design values from accidental changes during instantiation.
+```verilog
+module design #(
+	parameter WIDTH = 8
+)(
+	output [WIDTH-1:0] out,
+	input	[WIDTH-1:0] a,
+	input	[WIDTH-1:0] b
+);
+	// Define a local parameter that cannot be modified externally
+	localparam LENGTH = 4;
+	
+	assign out = a + b;
+endmodule
+
+module tb;
+	reg [15:0] a;
+	reg [15:0] b;
+	wire [15:0] out;
+
+	// Instantiate the design module
+	design #(.WIDTH(16)) inst(
+		.out(out),
+		.a(a),
+		.b(b)
+	);
+
+	// Illegal
+	// LENGTH is a localparam
+	design #(.WIDTH(16),.LENGTH(5)) inst(....);
+endmodule
+```
+However,local parameters can be assigned constant expressions containing parameters, which can be modified with defparam statements or module instance parameter value assignments.
+```verilog
+module design #(
+	parameter WIDTH = 8,
+				PARAM_LENGTH = 4
+)(
+	output [WIDTH-1:0] out,
+	input	[WIDTH-1:0] a,
+	input	[WIDTH-1:0] B
+);
+	localparam LENGTH = 2 + PARAM_LENGTH; // modified
+
+	assign out = a + b;
+endmodule
+
+module tb;
+	// Instantiate design
+	design #(.WIDTH(16),.PARAM_LENGTH(5)) u0(....);
+endmodule
+```
+Bit-selects and part-selects of local parameters that are not of type real shall be allowed.
+```verilog
+module design #(parameter WIDTH = 8, PARAM_LENGTH = 4) (
+	output	[WIDTH-1:0] out,
+    input	[WIDTH-1:0] a,
+    input	[WIDTH-1:0] b,    
+);
+
+  // Assign a part-select of original parameter
+  localparam LENGTH = 2 + PARAM_LENGTH[1:0];
+
+  assign out = a + b;
+
+  initial begin
+    $display("Length = %0d", LENGTH);
+  end
+endmodule
+
+module tb;
+  // Statements
+
+  // Update parameter length to 6, and localparam should get 2 + 2'b10 = 4
+  design #(.WIDTH(16), .PARAM_LENGTH(6)) add_instance2 ( ... );
+endmodule
+```
+##### specify parameters
+略
+##### Difference between parameter and localparam
 
 
 
