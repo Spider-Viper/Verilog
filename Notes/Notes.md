@@ -1634,7 +1634,11 @@ module tb;
     end
 endmodule
 ```
+- Difference between Function and Task
 
+| Function 								| Task					|
+| ------------------------- 			| --------------------- |
+| Can return only a single value		| Cannot return a value, but can achieve the same effect using output arguments |
 
 
 
