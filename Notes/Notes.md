@@ -1851,7 +1851,7 @@ endmodule
 ```
 - Intra-assignment Delays
 
-> <LHS> = #<delay> <RHS>
+> \<LHS\> = #\<delay\> \<RHS\>
 > Delay is specified on the right side
 
 An intra-assignment delay is one where there is a delay on the RHS of the assignment operator. This indicates that the statement is evaluated and values of all signals on the RHS is captured first. Then it is assigned to the resultant signal only after the delay expires.
