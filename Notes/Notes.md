@@ -1638,7 +1638,292 @@ endmodule
 
 | Function 					| Task					|
 | ------------------------- | --------------------- |
-| Can return only a single value		| Cannot return a value, but can achieve the same effect using output arguments |
+| Can return only a single value | Cannot return a value, but can achieve the same effect using output arguments |
+| Should have atleast one input argument and cannot have output or inout arguments | Can have zero or more arguments of any type |
+| Cannot have time-controlling statements/delay, and hence executes in the same simulation time unit | Can contain time-controlling statements/delay |
+| Cannot enable a task, because of the abovel rule | Can enable other tasks and functions |
+- Disable Task
+
+Using **disable** keyword
+```systemverilog
+// systemverilog
+
+module tb;
+
+	task display();
+		begin : T_DISPLAY
+			$display("[%0t] T_TASK started", $time);
+			#100
+			$display("[%0t] T_TASK ended", $time);
+		end
+
+		begin : S_DISPLAY
+			#10;
+			$display("[%0t] S_TASK started", $time);
+			#20
+			$display("[%0t] S_TASK ended", $time);
+		end
+	endtask
+
+	initial display();
+	initial begin
+		#50 disable display.T_DISPLAY;
+	end
+
+endmodule
+```
+### Delay Control
+There are two types of timing controls in Verilog - **delay** and **event** expressions.
+
+- Delay Control
+
+If the delay expression evaluates to an unknown or high-impedance value it will be interpreted as zero delay. If it evaluates to a negative value, it will be interpreted as a 2's complement unsigned integer of the same size as a time variable.
+```systemverilog
+// systemverilog
+`timescale 1ns/1ps
+
+module tb;
+	reg [3:0] a, b;
+	
+	initial begin
+		{a,b} <= 0;
+		$display("T=%0t a=%0d b=%0d", $realtime, a, b);
+
+		#10
+		a <= $random;
+		$display("T=%0t a=%0d b=%0d", $realtime, a, b);
+
+		#10
+		b <= $random;
+		$display("T=%0t a=%0d b=%0d", $realtime, a, b);
+
+		#(a) $display ("T=%0t After a delay of a=%0d units", $realtime, a);
+		#(a+b) $display ("T=%0t After a delay of a=%0d + b=%0d = %0d units", $realtime, a, b, a+b);
+		#((a+b)*10ps) $display ("T=%0t After a delay of %0d * 10ps", $realtime, a+b);
+
+		#(b-a) $display ("T=%0t Expr evaluates to a negative delay", $realtime);
+		#('h10) $display ("T=%0t Delay in hex", $realtime);
+
+		a = 'hX;
+		#(a) $display ("T=%0t Delay is unknown, taken as zero a=%h", $realtime, a);
+
+		a = 'hZ;
+		#(a) $display ("T=%0t Delay is in high impedance, taken as zero a=%h", $realtime, a);
+
+		#1ps $display ("T=%0t Delay of 10ps", $realtime);		
+	end
+
+	// $realtime ???
+endmodule
+```
+- Event Control
+
+Value changes on nets and variables can be used as a synchronization event to trigger execution other procedural statements and is an implicit event. The event can also be based on the direction of change like towards 0 which makes it a **negedge** and a change towards 1 makes it a **posedge**.
+- A **negedge** is when there is a transition from 1 to X,Z or 0 and from X or Z to 0
+- A **posedge** is when there is a transition from 0 to X,Z or 1 and from X or Z to 1
+
+```systemverilog
+// systemverilog
+module tb;
+	reg a, b;
+	initial begin
+		a <= 0;
+
+		#10 a <= 1;
+		#10 b <= 1;
+
+		#10 a <= 0;
+		#15 a <= 1;
+	end
+
+	// Start another procedural bloc that waits for an update to signals made in the above procedural block
+
+	initial begin
+		@(posedge a);
+		$display("T=%0t Posedge of a detected for 0->1", $time);
+		@(posedge b);
+		$display("T=%0t Posedge of b detected for 0->1", $time);
+	end
+
+	initial begin
+		@(posedge (a + b)) $display("T=%0t Posedge of a+b",$time);
+
+		@(a) $display("T=%0t Change in a fount", $time);
+	end
+endmodule
+```
+- Named Events
+
+An event cannot hold any data, has no time duration and cna bo made to occur at any particular time. A named event is triggered by te -> operator by prefixing it before the named event handle. A named event can be waited upon by using the @ operator described above.
+```systemverilog
+// systemverilog
+module tb;
+  event a_event;
+  event b_event[5];
+
+  initial begin
+    #20 -> a_event;
+
+    #30;
+    ->a_event;
+
+    #50 ->a_event;
+    #10 ->b_event[3];
+  end
+
+  always @ (a_event) $display ("T=%0t [always] a_event is triggered", $time);
+
+  initial begin
+    #25;
+    @(a_event) $display ("T=%0t [initial] a_event is triggered", $time);
+
+    #10 @(b_event[3]) $display ("T=%0t [initial] b_event is triggered", $time);
+  end
+endmodule
+```
+Named events can be used to synchronize two or more concurrently running processes. For example, the always block and the second initial block are synchronized by a_event . Events can be declared as arrays like in the case of b_event which is an array of size 5 and the index 3 is used for trigger and wait purpose.
+
+- Level Sensitive Event Control
+
+The **wait** statement shall evaluate a condition and if it is false, the procedural statements following it shall remain blocked until the condition becomes true.
+```systemverilog
+module tb;
+  reg [3:0] ctr;
+  reg clk;
+
+  initial begin
+    {ctr, clk} <= 0;
+
+    wait (ctr);
+    $display ("T=%0t Counter reached non-zero value 0x%0h", $time, ctr);
+
+    wait (ctr == 4) $display ("T=%0t Counter reached 0x%0h", $time, ctr);
+
+    $finish;
+  end
+
+  always #10 clk = ~clk;
+
+  always @ (posedge clk)
+    ctr <= ctr + 1;
+
+endmodule
+
+/*
+	simulation result:
+	# T=10 Counter reached non-zero value 0x1
+	# T=70 Counter reached 0x4
+*/
+```
+### Inter and Intra Assignment Delay
+- Inter-assignment Delays
+
+> #<delay> <LHS> = <RHS>
+> Delay is specified on the left side
+
+An inter-assignment delay statement has delay value on the LHS of the assignment operator. This indicates that the statement itself is executed after the delay expires, and is the most commonly using form of delay control.
+```systemverilog
+module tb;
+	reg a, b, c, d, q;
+	initial begin
+		$monitor("[%0t] a=%0b b=%0b c=%0b q=%0b", $time, a, b, c, q);
+
+		// Initialize all signals to 0 at time 0
+		a <= 0;
+		b <= 0;
+		c <= 0;
+		q <= 0;
+
+		// Inter-assignment delay: Wait for #5 time units
+		// and then assign a and c to 1. Note that 'a' and 'c'
+		// gets updated at the end of current timestep
+		#5  a <= 1;
+			c <= 1;
+
+		// Inter-assignment delay: Wait for #5 time units
+		// and then assign 'q' with whatever value RHS gets
+		// evaluated to
+		#5 q <= a & b | c;
+
+		#20;
+  	end
+endmodule
+```
+- Intra-assignment Delays
+
+> <LHS> = #<delay> <RHS>
+> Delay is specified on the right side
+
+An intra-assignment delay is one where there is a delay on the RHS of the assignment operator. This indicates that the statement is evaluated and values of all signals on the RHS is captured first. Then it is assigned to the resultant signal only after the delay expires.
+```systemverilog
+module tb;
+  reg  a, b, c, q;
+
+  initial begin
+    $monitor("[%0t] a=%0b b=%0b c=%0b q=%0b", $time, a, b, c, q);
+
+	// Initialize all signals to 0 at time 0
+    a <= 0;
+    b <= 0;
+    c <= 0;
+    q <= 0;
+
+    // Inter-assignment delay: Wait for #5 time units
+    // and then assign a and c to 1. Note that 'a' and 'c'
+    // gets updated at the end of current timestep
+    #5  a <= 1;
+    	c <= 1;
+
+    // Intra-assignment delay: First execute the statement
+    // then wait for 5 time units and then assign the evaluated
+    // value to q
+    q <= #5 a & b | c;
+
+    #20;
+  end
+endmodule
+
+/*
+ * 	simulation result:
+ * 	# [0] a=0 b=0 c=0 q=0
+ *	# [5] a=1 b=0 c=1 q=0
+*/
+```
+```systemverilog
+module tb;
+  reg  a, b, c, q;
+
+  initial begin
+    $monitor("[%0t] a=%0b b=%0b c=%0b q=%0b", $time, a, b, c, q);
+
+	// Initialize all signals to 0 at time 0
+    a <= 0;
+    b <= 0;
+    c <= 0;
+    q <= 0;
+
+    // Inter-assignment delay: Wait for #5 time units
+    // and then assign a and c to 1. Note that 'a' and 'c'
+    // gets updated at the end of current timestep
+    #5  a = 1;
+    	c = 1;
+
+    // Intra-assignment delay: First execute the statement
+    // then wait for 5 time units and then assign the evaluated
+    // value to q
+    q <= #5 a & b | c;
+
+    #20;
+  end
+endmodule
+
+/*
+ * 	simulation result:
+ * 	# [0] a=0 b=0 c=0 q=0
+ *	# [5] a=1 b=0 c=1 q=0
+ *	# [10] a=1 b=0 c=1 q=1
+*/
+```
 
 
 
