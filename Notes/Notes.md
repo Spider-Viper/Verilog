@@ -1481,10 +1481,156 @@ endmodule
 略
 ##### Difference between parameter and localparam
 ### Functions
+A function shall have atleast one input declared and the return type will be void if the function does not return anything.
+- Syntax
+```verilog
+function [automatic] [return_type] name ([port_list]);
+	//
+endfunction
+```
+*note: The keyword "automatic"(动态) will make the funciton reentrant and items declared within the task are dynamically allocated rather than shared between different invocations of the task. This will be useful for recursive functions and when the same funciton is executed concurrently by N processes when forked.*
+
+- Function Declarations
+
+two ways:
+
+```verilog
+// 方式一
+function [7:0] sum;
+	input [7:0] a, b;
+	begin
+		sum = a + b;
+	end
+endfunction
+
+//方式二
+function [7:0] sum (input [7:0] a, b);
+	begin
+		sum = a + b;
+	end
+endfunction
+```
+- Returning a value from a function
+
+**The funciton definition will implicitly create an internal variable of the same name as that of the function. Hence it it illegal to declare another variable of the same name inside the scope of the function. The return value is initialized by assigning the funciton result to the internal variable.**
+
+`sum = a + b`
+
+- Function Rules
+	- 返回值
+	- A function should have atleast one input
+	- A function cannot have an output or inout
+	- A function cannot contain any time-controlled statements like #,@,wait,posedge,negedge
+	- A function cannot have non-blocking assignments or force-release or assign-deassign
+	- A function cannot have any triggers
+	- A function cannot start a task because it may consume simulation time, but can call other functions
+
+### Task
+A function is meant to do some processing on the input and return a single value, whereas a task is more general and can calculate multiple result values and return them using output and inout type arguments. Task can contain simulation time consuming elements such as @,posedge and others.
+- Syntax
+```verilog
+// style 1
+task [name];
+	input [port_list];
+	inout [port_list];
+	output [port_list];
+	begin
+		//
+	end
+endtask
+
+// style 2
+task [name] (
+	output [port_list],
+	input [port_list],
+	inout [port_list]
+);
+	begin
+		//
+	end
+endtask
+
+// style 3
+// Empty port list
+task [name]();
+	begin
+		//
+	end
+endtask
+```
+- Static Task
+If a task is static, then all its member variables will be shared across different invocations of the same task that has been launched to run concurrently.(类似于C 语言中的静态变量)
+- Automatic Task
+The keyword **automatic** will make the task reentrant, otherwise it will be static by default. All items inside *automatic* tasks are allocated dynamically for each invocation and not shared between invocation of the same task running concurrently. Note that *automatic* task items cannot be accessed by hierarchical references.
+```systemverilog
+//example
+// verilog 报错？？？ 那就改为systemverilog
+module tb;
+
+    initial design_task();
+    initial design_task();
+    initial design_task();
+    initial design_task();
+
+	// static task
+	task design_task();
+		static integer i = 0;   // 显式声明为static 否则报错。。。
+		i = i + 1;
+		$display("i=%0d",i);
+	endtask
+
+endmodule
+```
+If a task is made automatic, each invocation of the task is allocated a different space in simulation memory and behaves differently.
+```systemverilog
+module tb;
+
+	initial display();
+	initial display();
+	initial display();
+	initial display();
 
 
+	task automatic display();
+		integer i = 0;	// 无需显式声明为automatic
+		i = i + 1;
+		$display("i = %0d", i);
+	endtask
+endmodule
+```
+- Global Task
+Tasks that are declared outside all modules are called global tasks as they have a global scope and can be called within any module.
+```systemverilog
+task display();
+    $display("This is a global task");
+endtask
 
+module tb;
+    initial begin
+        display();
+    end
+endmodule
+```
+If the task was declared within another module, it would have to be called in reference to the module instance name.
+```systemverilog
+module des;
+    // initial begin
+    //     display();
+    // end
 
+    task display();
+        $display("Display string");
+    endtask
+endmodule
+
+module tb;
+    des u0();
+
+    initial begin
+        u0.display();
+    end
+endmodule
+```
 
 
 
