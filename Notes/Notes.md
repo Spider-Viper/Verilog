@@ -1559,8 +1559,10 @@ task [name]();
 endtask
 ```
 - Static Task
+
 If a task is static, then all its member variables will be shared across different invocations of the same task that has been launched to run concurrently.(类似于C 语言中的静态变量)
 - Automatic Task
+
 The keyword **automatic** will make the task reentrant, otherwise it will be static by default. All items inside *automatic* tasks are allocated dynamically for each invocation and not shared between invocation of the same task running concurrently. Note that *automatic* task items cannot be accessed by hierarchical references.
 ```systemverilog
 //example
@@ -1599,6 +1601,7 @@ module tb;
 endmodule
 ```
 - Global Task
+
 Tasks that are declared outside all modules are called global tasks as they have a global scope and can be called within any module.
 ```systemverilog
 task display();
