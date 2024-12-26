@@ -1821,7 +1821,7 @@ endmodule
 > #\<delay\> \<LHS\> = \<RHS\>
 
 Delay is specified on the left side
-
+>
 An inter-assignment delay statement has delay value on the LHS of the assignment operator. This indicates that the statement itself is executed after the delay expires, and is the most commonly using form of delay control.
 ```systemverilog
 module tb;
@@ -1855,7 +1855,7 @@ endmodule
 > \<LHS\> = #\<delay\> \<RHS\>
 
 Delay is specified on the right side
-
+>
 An intra-assignment delay is one where there is a delay on the RHS of the assignment operator. This indicates that the statement is evaluated and values of all signals on the RHS is captured first. Then it is assigned to the resultant signal only after the delay expires.
 ```systemverilog
 module tb;
