@@ -2106,7 +2106,7 @@ endmodule
 
 1. if-else逻辑缺陷
 
-version 1.0
+- version 1.0
 
 ```systemverilog
 //systemverilog
@@ -2136,7 +2136,7 @@ end
 	由于内部都是对同一个变量的阻塞赋值，因此 always 中的语句是顺序执行的。执行时首先将 q 赋值为 0。如果信号 en 有效，则改写 q 的值为 data，否则 q 会保持为 0（而不是自己先前的值）。因此，这里 q 要么取值为 data，要么取值为 0，不会出现保持自身数值不变的情况，所以不会产生锁存器。
 */
 ```
-version 2.0
+- version 2.0
 
 ```systemverilog
 // systemverilog
