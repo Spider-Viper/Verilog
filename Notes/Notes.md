@@ -2122,6 +2122,7 @@ module design_test(
 endmodule
 ```
 ![](https://github.com/Spider-Viper/Picture/blob/main/%E4%B8%AD%E7%A7%91%E5%A4%A7%20Latch.png)
+
 解决办法：
 - 将if-else结构补充完整
 - 对信号赋初始值
