@@ -2054,7 +2054,7 @@ Xilinx建议采用同步复位
 ##### FPGA的初始复位
 ![](https://github.com/Spider-Viper/Picture/blob/main/%E4%B8%AD%E7%A7%91%E5%A4%A7%20FPGA%20%E4%B8%8A%E7%94%B5%E5%A4%8D%E4%BD%8D.png)
 
-### 硬件层面上额并行
+### 硬件层面上的并行
 ```systemverilog
 // systemverilog
 module design_module(
@@ -2105,9 +2105,11 @@ endmodule
 - 锁存器结构会消耗更多资源
 
 1. if-else逻辑缺陷
+
+version 1.0
+
 ```systemverilog
 //systemverilog
-// version 1.0
 module design_test(
 	output reg q,
 	input	en,
@@ -2133,9 +2135,10 @@ end
 	由于内部都是对同一个变量的阻塞赋值，因此 always 中的语句是顺序执行的。执行时首先将 q 赋值为 0。如果信号 en 有效，则改写 q 的值为 data，否则 q 会保持为 0（而不是自己先前的值）。因此，这里 q 要么取值为 data，要么取值为 0，不会出现保持自身数值不变的情况，所以不会产生锁存器。
 */
 ```
+version 2.0
+
 ```systemverilog
 // systemverilog
-// version 2.0
 module design_test(
     input               data1,
     input               data2,
