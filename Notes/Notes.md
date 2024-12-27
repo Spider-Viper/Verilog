@@ -169,7 +169,7 @@
 
 ### Ports
 
-1. Ports are by default considered as nets of type wire.
+1. Ports are by default considered as nets of type wire. input、inout 类型的端口不能声明为 reg 数据类型，因为 reg 类型常用于保存数值，而输入端口只反映与其相连的外部信号的变化，不应保存这些信号的值。output 类型的端口则可以声明为 wire 或 reg 数据类型。
 
 2. **Signed ports**
    
@@ -279,7 +279,9 @@ Note that output from instances u1 and u2 are left unconnected in the RTL schema
 
 In simulations, such unconnected ports will be denoted as high impedance.
 
-All port declarations are implicity declared as wire and hence the port direction is sufficient in that case. However output ports that need to store values should be declared as reg data type and _can be used in a procedural block like always and initial only._
+模块例化时，如果某些信号不需要与外部信号进行连接交互，我们可以将其悬空，即端口例化处保持空白。当 output 端口悬空时，我们甚至可以在例化时将其省略。input 端口悬空时，模块内部输入的逻辑功能表现为高阻状态（逻辑值为 z）。
+
+All port declarations are implicity declared as wire and hence the port direction is sufficient in that case. However output ports that need to store values should be declared as reg data type and *can be used in a procedural block like always and initial only.*
 
 Ports of type input or inout cannot be declared as reg because they are being driven from outside continuously and should not store values, rather reflect the changes in the external signals as soon as possible.
 
@@ -682,6 +684,10 @@ endmodule
 	| 1    | 1    | 1    | 1    | 1    |
 	| x    | x    | 1    | x    | x    |
 	| z    | x    | 1    | x    | x    |
+
+	按位运算符对 2 个操作数的每 bit 数据进行按位操作。如果 2 个操作数位宽不相等，则用 0 向左扩展补充较短的操作数。按位非是单目运算符，它对操作数的每 bit 数据进行取反操作。
+
+	逻辑非 ! 和按位非 ~ 在什么情况下等价？在什么情况下不等价？逻辑或 || 和按位或 | 呢？逻辑与 && 和按位与 & 呢？
 7. Shift Operators:
 	- logical shift operator << and >>
 	- arithmetic shift operator <<< and >>>
@@ -782,7 +788,10 @@ endmodule
 		end
 	endmodule
 	```
-
+	```verilog
+	b[31:0] = {{24{a[7]}},a[7:0]};	// 将a信号的低8位先符号扩展到32位后再赋值给b信号
+									// 注意大括号！！！
+	```
 11. Conditional Operator
 
 - Nested Conditional Operators
@@ -798,6 +807,31 @@ assign out = (a < b) ?  (x % 2) ? y : z : 0;
 // step 2 -> []
 	(x % 2)? y : z
 ```
+12. 归约运算符
+
+共六种。为：
+
+&（归约与）
+
+~&（归约非与）
+
+|（归约或）
+
+~|（归约非或）
+
+^（归约异或）
+
+~^（归约同或）
+
+归约运算符与按位运算符的符号相同，但规约运算符都是单目运算符。它对多位操作数逐位进行操作，最终产生一个 1bit 结果。
+
+> A = 4'b1010;
+> 
+> &A        // 结果为 1 & 0 & 1 & 0 = 1'b0，可用来判断变量 A 是否全 1
+>
+>~|A       // 结果为 ~(1 | 0 | 1 | 0) = 1'b0, 可用来判断变量 A 是否为全 0
+
+>^A        // 结果为 1 ^ 0 ^ 1 ^ 0 = 1'b0
 
 ### Always Block
 
@@ -1122,7 +1156,7 @@ endmodule
 ```
 ### Control Blocks
 ##### if-else-if
-- 注意优先级！！！
+- 注意优先级！！！(带有优先级的条件分支)
 - False includes : zero, X, Z
 - Hardware Implementation
 	- if without else
@@ -1175,6 +1209,7 @@ endmodule
 	![](https://github.com/Spider-Viper/Picture/blob/main/if-else-if-2.PNG)
 		
 ##### case statement
+- 相同优先级的条件分支
 - case,casez,casex
 - Difference between if-else-if and case
 	- Expressions given in a if-else block are more general while in a case block, a single expression is matched with multiple items.
@@ -1926,6 +1961,227 @@ endmodule
  *	# [10] a=1 b=0 c=1 q=1
 */
 ```
+
+### 时钟信号
+##### 占空比
+##### 时钟偏移
+##### 转换时间
+##### 时钟抖动
+##### 生成仿真所需时钟
+```systemverilog
+// systemverilog
+// style 1
+parameter T  = 10;
+reg clk;
+initial begin
+	clk = 0;
+	forever #(T/2) clk = ~clk;
+end
+
+// style 2
+parameter T = 10
+reg clk;
+initial clk = 0;
+always #(T/2) clk = ~clk;
+```
+```systemverilog
+// systemverilog
+// 占空比非50%的时钟信号
+parameter T_high = 10;
+parameter T_low = 5;
+reg clk;
+always begin
+	clk = 1;
+	# T_high;
+	clk = 0;
+	# T_low;
+end
+```
+### 复位信号
+##### 信号初始化
+- wire 信号不需要初始化，因只要与电路相连接，就必定有输出
+```systemverilog
+module Init4wire(
+	output out,
+	input a, b, c, d
+);
+	wire temp = 0;	// 等价于： wire signal; assign signal = value;
+	assign temp = a | b;	// 重复赋值
+	assign out = temp | c;
+endmodule
+```
+![](https://github.com/Spider-Viper/Picture/blob/main/%E4%B8%AD%E7%A7%91%E5%A4%A7%20verilog%20%E8%AF%AD%E6%B3%95%20%E4%B8%8B.png)
+
+为确保实际环境下数字系统在上电后有一个明确、稳定的初始状态，且系统在运行紊乱时可以恢复到正常的初始状态，我们会在模块设计中添加复位模块。复位电路保证了系统工作的可控性，在一定程度上其重要性不亚于时钟信号。
+
+##### 同步复位信号
+- 使用同步复位信号描述的电路会消耗更多的资源。
+- 复位信号的宽度必须大于一个时钟周期，否则可能发生遗漏。如下：
+![](https://github.com/Spider-Viper/Picture/blob/main/%E4%B8%AD%E7%A7%91%E5%A4%A7%20%E5%90%8C%E6%AD%A5%E5%A4%8D%E4%BD%8D%E4%BF%A1%E5%8F%B7%E5%8F%91%E7%94%9F%E9%81%97%E6%BC%8F.png)
+##### 异步复位信号
+```systemverilog
+// systemverilog
+// 错误的异步复位
+module Reset_design(
+	output reg 	[15:0] 	out1,
+	output reg 	[15:0] 	out2,
+	input 		[15:0] 	in,
+	input				en,
+	input				rstn,
+	input				clk
+);
+	always @(posedge clk or negedge rstn) begin
+		if(en)
+			out1 <= in;
+		else if(!rstn)
+			out1 <= 0;
+	end
+
+	always @(posedge clk or negedge rstn) begin
+		if(!rstn)
+			out2 <= 0;
+		else if(en)
+			out2 <= in;
+	end
+endmodule
+```
+![](https://github.com/Spider-Viper/Picture/blob/main/%E4%B8%AD%E7%A7%91%E5%A4%A7%20reset_design.png)
+
+**if-else 是有优先级的！！！**
+
+Xilinx建议采用同步复位
+
+##### FPGA的初始复位
+![](https://github.com/Spider-Viper/Picture/blob/main/%E4%B8%AD%E7%A7%91%E5%A4%A7%20FPGA%20%E4%B8%8A%E7%94%B5%E5%A4%8D%E4%BD%8D.png)
+
+### 硬件层面上额并行
+```systemverilog
+// systemverilog
+module design_module(
+	output reg [1:0] out1,
+	output reg [1:0] out2,
+	input			 sel
+);
+	always @(*) begin
+		// part 1
+		if(sel)
+			out1 = 2'd2;
+		else
+			out1 = 2'd0;
+
+		// part 2
+		if(sel)
+			out2 = 2'd2;
+		else
+			out2 = 2'd1;
+	end
+endmodule
+```
+![](https://github.com/Spider-Viper/Picture/blob/main/%E4%B8%AD%E7%A7%91%E5%A4%A7%20%E7%A1%AC%E4%BB%B6%E5%B1%82%E9%9D%A2%E7%9A%84%E5%B9%B6%E8%A1%8C%20.png)
+
+```systemverilog
+//systemverilog
+module test(
+	output reg [1:0] out,
+	input	[1:0]	sel,
+	input	[1:0]	num1,
+	input	[1:0]	num2
+);
+	always @(*) begin
+		out = 0;
+		if(sel[0])
+			out = num1;
+		else if(sel[1])
+			out = num2;
+	end
+endmodule
+```
+![](https://github.com/Spider-Viper/Picture/blob/main/%E4%B8%AD%E7%A7%91%E5%A4%A7%20%E7%A1%AC%E4%BB%B6%E5%B1%82%E9%9D%A2%E7%9A%84%E5%B9%B6%E8%A1%8C-2.png)
+### 避免锁存器
+在使用always进行组合逻辑电路建模时，可能会综合成不期望的锁存器结构。
+
+危害：
+- 电路的输出状态可能发生多次变化，增加了下一级电路的不确定性
+- 锁存器结构会消耗更多资源
+
+1. if-else逻辑缺陷
+```systemverilog
+//systemverilog
+// version 1.0
+module design_test(
+	output reg q,
+	input	en,
+	input	data
+);
+	always @(*) begin
+		if(en)
+			q = data;
+	end
+endmodule
+```
+![](https://github.com/Spider-Viper/Picture/blob/main/%E4%B8%AD%E7%A7%91%E5%A4%A7%20Latch.png)
+解决办法：
+- 将if-else结构补充完整
+- 对信号赋初始值
+```systemverilog
+always @(*) begin
+	q = 1'b0;
+	if(en)
+		q = data;
+end
+/*
+	由于内部都是对同一个变量的阻塞赋值，因此 always 中的语句是顺序执行的。执行时首先将 q 赋值为 0。如果信号 en 有效，则改写 q 的值为 data，否则 q 会保持为 0（而不是自己先前的值）。因此，这里 q 要么取值为 data，要么取值为 0，不会出现保持自身数值不变的情况，所以不会产生锁存器。
+*/
+```
+```systemverilog
+// systemverilog
+// version 2.0
+module design_test(
+    input               data1,
+    input               data2,
+    input               en,
+    output reg          q1,
+    output reg          q2
+);
+
+always @(*) begin
+    if (en)
+        q1 = data1;
+    else
+        q2 = data2;
+end
+endmodule
+
+// if 部分里没有对 q2 赋值，else 部分里没有对 q1 赋值
+```
+2. case逻辑缺陷
+3. 自赋值与判断
+- version 1.0
+```systemverilog
+reg a, b;
+always @(*) begin
+	if(a & b)
+		a = 1'b1;	// a 会产生锁存器
+	else
+		a = 1'b0;
+end
+```
+- version 2.0
+```systemverilog
+reg a, en;
+always @(*) begin
+	if(en)
+		a = a + 1;	// a 会生成锁存器
+	else
+		a = 1'b0;
+end
+```
+- version 3.0
+```systemverilog
+wire d, sel;
+assign d = (sel && d) ? 1'b0 : 1'b1;	// d 会生成锁存器
+```
+### Testbench
 
 
 
