@@ -973,7 +973,17 @@ always #10 clk = ~clk;
 	1. There are mainly two types of procedural block in Verilog: always and initial
 	2. An initial block is not synthesizable and hence cannot be converted into a hardware schematic with digital elements. These blocks are primarily used to initialize variables and drive design ports with specific values
 ### Generate Block
-	略
+A generate block allows to multiply module instances or perform conditional instantiation of any module. It provides the ability for the design to be built based on Verilog parameters. These statements are particularly convenient when the same operation or module instance needs to be repeated multiple times or if certain code has to be conditionally included based on given Verilog parameters.
+
+A generate block cannot contain port, parameter, specparam declarations or specify blocks. However, other module items and other generate blocks are allowed. All generate instantiations are coded within a module and between the keywords generate and endgenerate.
+
+Generated instantiations can have either modules, continuous assignments, always or initial blocks and user defined primitives. There are two types of generate constructs - loops and conditionals.
+
+* generate for loop
+	* The loop variable has to be declared using the keyword genvar which tells the tool that this variable is to be specifically used during elaboration of the generate block.
+* generate if-else
+* generate case
+
 ### Behavioral Modeling
 There are two kinds of block statements: sequential and parallel
 - sequential
@@ -2230,6 +2240,7 @@ $display; $monitor; $time
 - $time
 用来获取当前的仿真时间
 
+### 电路性能分析
 
 
 
